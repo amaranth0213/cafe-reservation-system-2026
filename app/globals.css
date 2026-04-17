@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cream-50 text-gray-800 font-sans;
+  }
+
+  h1, h2, h3 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-matcha-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-matcha-700 active:bg-matcha-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-matcha-700 border border-matcha-300 px-6 py-3 rounded-lg font-medium hover:bg-matcha-50 transition-colors;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-cream-200 p-6;
+  }
+
+  .input {
+    @apply w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-matcha-400 focus:border-transparent transition;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  .badge-available {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-matcha-100 text-matcha-800;
+  }
+
+  .badge-full {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800;
+  }
+
+  .badge-cancelled {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600;
+  }
+}
