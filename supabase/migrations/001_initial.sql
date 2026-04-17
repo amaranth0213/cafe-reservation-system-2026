@@ -27,14 +27,14 @@ CREATE TABLE menus (
 );
 
 -- 初期メニューデータ
-INSERT INTO menus (name, price, is_available, sort_order) VALUES
-  ('抹茶のテリーヌ', 600, true, 1),
-  ('低糖質の抹茶のシフォンケーキ', 550, true, 2),
-  ('抹茶のアフォガード', 650, true, 3),
-  ('オレンショコラケーキ', 580, true, 4),
-  ('ほうじ茶プリン', 500, true, 5),
-  ('苺大福', 450, true, 6),
-  ('パリパリもなか', 480, true, 7);
+INSERT INTO menus (name, description, price, is_available, sort_order) VALUES
+  ('抹茶のテリーヌ', null, 600, true, 1),
+  ('低糖質の抹茶のシフォンケーキ', null, 600, true, 2),
+  ('抹茶のアフォガード', null, 650, true, 3),
+  ('オレンショコラケーキ', null, 600, true, 4),
+  ('苺大福', null, 400, true, 5),
+  ('パリパリもなか', null, 400, true, 6),
+  ('てん茶のおにぎりセット', 'おにぎり一つと卵焼きとほうじ茶付き', 500, true, 7);
 
 -- 営業日（月曜日のみ）
 CREATE TABLE business_days (

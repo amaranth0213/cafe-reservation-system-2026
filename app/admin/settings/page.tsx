@@ -19,7 +19,7 @@ export default function AdminSettingsPage() {
 
   const fetchDays = async () => {
     setLoading(true);
-    const res = await fetch('/api/availability');
+    const res = await fetch('/api/admin/settings/days');
     const data = await res.json();
     setBusinessDays(Array.isArray(data) ? data : []);
     setLoading(false);
