@@ -445,7 +445,7 @@ export default function ReservePage() {
                           <div className="flex items-center gap-2">
                             <p className="font-medium">{menu.name}</p>
                             {soldOut && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-medium">本日完売</span>
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-medium">完売</span>
                             )}
                             {!soldOut && menu.remaining !== null && (
                               <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">

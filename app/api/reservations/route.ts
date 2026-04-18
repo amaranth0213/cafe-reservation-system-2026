@@ -89,8 +89,8 @@ export async function POST(request: NextRequest) {
   }
 
   // お菓子の在庫チェック
-  if (Array.isArray(order_items) && order_items.length > 0) {
-    const menuIds = order_items.filter((i: { quantity: number }) => i.quantity > 0).map((i: { menu_id: string }) => i.menu_id);
+  if (Array.isArray(items) && items.length > 0) {
+    const menuIds = items.filter((i: { quantity: number }) => i.quantity > 0).map((i: { menu_id: string }) => i.menu_id);
     if (menuIds.length > 0) {
       const { data: menuStocks } = await supabase
         .from('menus')
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 
       for (const menu of menuStocks ?? []) {
         if (menu.stock === null) continue; // 制限なし
-        const requested = order_items
+        const requested = items
           .filter((i: { menu_id: string }) => i.menu_id === menu.id)
           .reduce((sum: number, i: { quantity: number }) => sum + i.quantity, 0);
 
