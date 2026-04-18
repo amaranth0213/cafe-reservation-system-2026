@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { ReservationType, SeatCategory, SlotTime, OrderItem } from '@/types';
 import { SEAT_LABELS, SLOT_TIME_LABELS, RESERVATION_TYPE_LABELS } from '@/types';
-import { formatDateJP } from '@/lib/business-days';
+import { formatDateJP, isSweetsAvailable } from '@/lib/business-days';
 
 interface BusinessDayData {
   id: string;
@@ -261,8 +261,19 @@ export default function ReservePage() {
             {/* 予約タイプ */}
             <div className="card">
               <h2 className="text-lg font-semibold text-matcha-800 mb-4">予約タイプ</h2>
+              {selectedDate && !isSweetsAvailable(selectedDate) && (
+                <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                  🍡 お菓子の受付は土曜日で締め切りました。席のみのご予約となります。
+                </div>
+              )}
               <div className="space-y-2">
-                {(['seat_only', 'seat_with_food', 'takeout'] as ReservationType[]).map((type) => (
+                {(['seat_only', 'seat_with_food', 'takeout'] as ReservationType[])
+                  .filter(type => {
+                    if (!selectedDate) return true;
+                    if (!isSweetsAvailable(selectedDate) && type !== 'seat_only') return false;
+                    return true;
+                  })
+                  .map((type) => (
                   <label key={type} className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:border-matcha-300 transition-all">
                     <input
                       type="radio"

@@ -40,6 +40,32 @@ export function formatDateJP(dateStr: string): string {
   return `${year}年${month}月${day}日（月）`;
 }
 
+// 予約受付開始日時：営業日（月曜）の4日前の木曜日12:00 JST
+export function getReservationOpenTime(mondayDate: string): Date {
+  const monday = new Date(mondayDate + 'T00:00:00+09:00');
+  const thursday = new Date(monday.getTime() - 4 * 24 * 60 * 60 * 1000);
+  // 木曜日12:00 JST = 木曜日 03:00 UTC
+  return new Date(thursday.getTime() + 12 * 60 * 60 * 1000);
+}
+
+// お菓子受付締め切り：営業日（月曜）の2日前の土曜日23:59 JST
+export function getSweetsDeadline(mondayDate: string): Date {
+  const monday = new Date(mondayDate + 'T00:00:00+09:00');
+  const saturday = new Date(monday.getTime() - 2 * 24 * 60 * 60 * 1000);
+  // 土曜日23:59 JST = 土曜日 14:59 UTC
+  return new Date(saturday.getTime() + (23 * 60 + 59) * 60 * 1000);
+}
+
+// 予約受付中かどうか（木曜12時以降）
+export function isReservationOpen(mondayDate: string): boolean {
+  return Date.now() >= getReservationOpenTime(mondayDate).getTime();
+}
+
+// お菓子の注文が可能かどうか（土曜23:59以前）
+export function isSweetsAvailable(mondayDate: string): boolean {
+  return Date.now() <= getSweetsDeadline(mondayDate).getTime();
+}
+
 // 予約コード生成（例: CA-00042）
 let codeCounter = 0;
 export function generateReservationCode(): string {

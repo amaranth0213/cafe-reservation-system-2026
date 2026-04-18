@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { getSlotAvailability, getDayAvailability } from '@/lib/availability';
+import { isReservationOpen } from '@/lib/business-days';
 
 // GET /api/availability?date=2026-04-20 または ?slot_id=xxx
 export async function GET(request: NextRequest) {
@@ -48,5 +49,7 @@ export async function GET(request: NextRequest) {
     .order('date')
     .limit(12);
 
-  return NextResponse.json(businessDays ?? []);
+  // 木曜日12時以降のみ受付開始
+  const openDays = (businessDays ?? []).filter(bd => isReservationOpen(bd.date));
+  return NextResponse.json(openDays);
 }
