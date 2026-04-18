@@ -14,8 +14,9 @@ export default async function HomePage() {
       {/* ヒーローセクション */}
       <section className="bg-matcha-700 text-white py-20 px-4">
         <div className="max-w-2xl mx-auto text-center">
-          <h1 className="text-4xl font-serif font-semibold mb-4 leading-tight">
-            <span className="text-2xl">お茶とあまいもの</span>　あまらんす
+          <h1 className="text-4xl font-serif font-semibold mb-4 leading-snug">
+            <span className="block text-2xl">お茶とあまいもの</span>
+            <span className="block">あまらんす</span>
           </h1>
           <p className="text-matcha-100 text-lg mb-2 leading-relaxed">
             毎週月曜日、９：３０〜１６：００（３部制）
