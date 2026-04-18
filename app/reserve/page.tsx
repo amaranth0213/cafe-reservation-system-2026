@@ -35,6 +35,7 @@ interface MenuData {
   price: number;
   description: string | null;
   stock: number | null;
+  is_takeout_available: boolean;
 }
 
 interface SeatTypeData {
@@ -441,7 +442,10 @@ export default function ReservePage() {
                               <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-medium">本日完売</span>
                             )}
                             {!soldOut && menu.stock !== null && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">残り{menu.stock}個</span>
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">本日{menu.stock}個限定</span>
+                            )}
+                            {!menu.is_takeout_available && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 font-medium">イートインのみ</span>
                             )}
                           </div>
                           {menu.description && <p className="text-xs text-gray-500 mt-0.5">{menu.description}</p>}
@@ -460,7 +464,7 @@ export default function ReservePage() {
                         </div>
                       )}
 
-                      {!soldOut && (
+                      {!soldOut && menu.is_takeout_available && (
                         <div className="flex items-center gap-3">
                           <span className="text-sm text-gray-600 w-24">お持ち帰り</span>
                           <div className="flex items-center gap-2">

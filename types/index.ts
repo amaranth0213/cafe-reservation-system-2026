@@ -18,6 +18,7 @@ export interface Menu {
   is_available: boolean;
   sort_order: number;
   stock: number | null;
+  is_takeout_available: boolean;
   created_at: string;
   updated_at: string;
 }

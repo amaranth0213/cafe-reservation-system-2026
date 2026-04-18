@@ -27,8 +27,8 @@ export default function AdminMenuPage() {
 
     const method = isNew ? 'POST' : 'PATCH';
     const body = isNew
-      ? { name: editing.name, description: editing.description, price: editing.price ?? 0, is_available: editing.is_available ?? true, sort_order: editing.sort_order ?? 0, stock: editing.stock ?? null }
-      : { id: editing.id, name: editing.name, description: editing.description, price: editing.price, is_available: editing.is_available, sort_order: editing.sort_order, stock: editing.stock ?? null };
+      ? { name: editing.name, description: editing.description, price: editing.price ?? 0, is_available: editing.is_available ?? true, sort_order: editing.sort_order ?? 0, stock: editing.stock ?? null, is_takeout_available: editing.is_takeout_available ?? true }
+      : { id: editing.id, name: editing.name, description: editing.description, price: editing.price, is_available: editing.is_available, sort_order: editing.sort_order, stock: editing.stock ?? null, is_takeout_available: editing.is_takeout_available ?? true };
 
     const res = await fetch('/api/admin/menu', {
       method,
@@ -202,6 +202,15 @@ export default function AdminMenuPage() {
                   className="accent-matcha-600"
                 />
                 予約フォームに表示する
+              </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editing.is_takeout_available ?? true}
+                  onChange={(e) => setEditing({ ...editing, is_takeout_available: e.target.checked })}
+                  className="accent-matcha-600"
+                />
+                テイクアウト可能
               </label>
             </div>
             <div className="flex gap-3 mt-6">
