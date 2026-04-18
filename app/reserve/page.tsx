@@ -199,10 +199,9 @@ export default function ReservePage() {
         {/* ヘッダー */}
         <div className="text-center mb-8">
           <Link href="/" className="text-matcha-600 text-sm hover:underline">← トップへ戻る</Link>
-          <p className="text-matcha-600 text-sm mt-4 tracking-widest">月曜の特別なひと時を</p>
-          <h1 className="text-2xl font-serif text-matcha-800 mt-1">お茶と甘いもの　あまらんす</h1>
-          <p className="text-gray-500 text-sm mt-2">毎週月曜日　９時３０分〜16時</p>
-          <p className="text-gray-500 text-sm">手作りお菓子とゆったりお過ごしください</p>
+          <h1 className="text-2xl font-serif text-matcha-800 mt-3">お茶と甘いものあまらんす</h1>
+          <p className="text-gray-500 text-sm mt-2">毎週月曜日、９：３０〜１６：００（３部制）</p>
+          <p className="text-gray-500 text-sm">手作りお菓子をゆっくりお楽しみください</p>
           <div className="mt-5 border-t border-matcha-100" />
         </div>
 
@@ -429,7 +428,7 @@ export default function ReservePage() {
         {step === 2 && (
           <form onSubmit={handleStep2Submit} className="space-y-6">
             <div className="card">
-              <h2 className="text-lg font-semibold text-matcha-800 mb-2">お菓子を選んでください</h2>
+              <h2 className="text-lg font-semibold text-matcha-800 mb-2">お菓子のメニュー（都合により変更されることがあります）</h2>
               <p className="text-sm text-gray-500 mb-4">イートイン・お持ち帰りを選べます</p>
 
               {menus.length === 0 ? (
