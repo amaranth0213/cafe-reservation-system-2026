@@ -15,6 +15,7 @@ interface BusinessDayData {
 }
 
 interface SeatAvailData {
+  seat_type_id: string;
   category: SeatCategory;
   capacity: number;
   total_count: number;

@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         .select('business_days(date)')
         .eq('id', time_slot_id)
         .single();
-      const date = (tsData?.business_days as { date: string } | null)?.date;
+      const date = (tsData?.business_days as unknown as { date: string } | null)?.date;
       if (date && !isSweetsAvailable(date)) {
         return NextResponse.json(
           { error: 'お菓子の受付は土曜日で締め切りました。席のみのご予約をお選びください。' },
