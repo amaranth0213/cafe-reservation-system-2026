@@ -568,8 +568,14 @@ export default function ReservePage() {
               )}
             </div>
 
+            {reservationType === 'seat_only' && (
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-800">
+                ⚠️ 席のみのご予約の場合、当日の状況によりお菓子をご用意できない場合があります。あらかじめご了承ください。
+              </div>
+            )}
+
             <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
-              キャンセルの場合は Instagram のメッセージよりご連絡ください。
+              キャンセル・注文変更は Instagram のメッセージよりご連絡ください。
             </div>
 
             {error && (

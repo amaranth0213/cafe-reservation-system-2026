@@ -51,7 +51,7 @@ export default async function HomePage() {
             ))}
           </div>
           <div className="mt-8 p-5 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-800">
-            <strong>キャンセルについて：</strong>ご予約のキャンセルは Instagram のメッセージよりご連絡ください。
+            <strong>キャンセル・注文変更について：</strong>キャンセルや注文変更は Instagram のメッセージよりご連絡ください。
           </div>
         </div>
       </section>
@@ -78,7 +78,7 @@ export default async function HomePage() {
 
       {/* フッター */}
       <footer className="bg-matcha-900 text-matcha-200 py-8 px-4 text-center text-sm">
-        <p className="mb-2">キャンセルは Instagram DMにてご連絡ください</p>
+        <p className="mb-2">キャンセル・注文変更は Instagram DMにてご連絡ください</p>
         <p className="text-matcha-400 text-xs">© 2026 お茶とあまいもの　あまらんす</p>
       </footer>
     </main>
