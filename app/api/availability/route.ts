@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     .eq('is_open', true)
     .gte('date', today)
     .order('date')
-    .limit(12);
+    .limit(1);
 
   // 木曜日12時以降のみ受付開始
   const openDays = (businessDays ?? []).filter(bd => isReservationOpen(bd.date));

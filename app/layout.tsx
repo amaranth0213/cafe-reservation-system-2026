@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'カフェ予約 | 月曜日のひとときを',
-  description: '手作りのお菓子と緑茶でほっと一息。月曜日限定のカフェです。',
+  title: 'お茶とあまいもの あまらんす | ご予約',
+  description: '毎週月曜日、９：３０〜１６：００（３部制）。手作りお菓子をゆっくりお楽しみください。',
   openGraph: {
-    title: 'カフェ予約',
-    description: '月曜日限定の手作りお菓子カフェ。席のご予約はこちらから。',
+    title: 'お茶とあまいもの あまらんす',
+    description: '毎週月曜日、９：３０〜１６：００（３部制）。席のご予約はこちらから。',
   },
 };
 
