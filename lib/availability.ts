@@ -41,6 +41,7 @@ export async function getSlotAvailability(timeSlotId: string): Promise<SlotAvail
   const seats: SeatAvailability[] = seatTypes.map((st) => {
     const used = usedByTypeId[st.id] ?? 0;
     return {
+      seat_type_id: st.id,
       category: st.category as SeatCategory,
       capacity: st.capacity,
       total_count: st.total_count,

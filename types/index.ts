@@ -71,6 +71,7 @@ export interface ReservationItem {
 
 // 空席状況
 export interface SeatAvailability {
+  seat_type_id: string;
   category: SeatCategory;
   capacity: number;
   total_count: number;

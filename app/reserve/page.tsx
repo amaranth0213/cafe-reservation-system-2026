@@ -334,18 +334,15 @@ export default function ReservePage() {
                   {slotAvailability
                     .find((s) => s.time_slot_id === selectedSlotId)
                     ?.seats.map((seat) => {
-                      const seatType = seatTypes.find((st) => st.category === seat.category);
                       return (
                         <button
                           key={seat.category}
                           type="button"
                           disabled={seat.remaining === 0}
                           onClick={() => {
-                            if (seatType) {
-                              setSelectedSeatTypeId(seatType.id);
-                              setSelectedSeatCategory(seat.category);
-                              setPartySize(1);
-                            }
+                            setSelectedSeatTypeId(seat.seat_type_id);
+                            setSelectedSeatCategory(seat.category);
+                            setPartySize(1);
                           }}
                           className={`w-full p-4 rounded-lg border text-left transition-all ${
                             selectedSeatCategory === seat.category
@@ -418,6 +415,11 @@ export default function ReservePage() {
               </div>
             </div>
 
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                {error}
+              </div>
+            )}
             <button type="submit" className="btn-primary w-full text-lg py-4">
               {reservationType === 'seat_only' ? '内容を確認する' : 'お菓子を選ぶ →'}
             </button>
