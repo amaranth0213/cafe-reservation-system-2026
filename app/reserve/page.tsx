@@ -34,6 +34,7 @@ interface MenuData {
   name: string;
   price: number;
   description: string | null;
+  stock: number | null;
 }
 
 interface SeatTypeData {
@@ -191,10 +192,10 @@ export default function ReservePage() {
         {/* ヘッダー */}
         <div className="text-center mb-8">
           <Link href="/" className="text-matcha-600 text-sm hover:underline">← トップへ戻る</Link>
-          <p className="text-matcha-600 text-sm mt-4 tracking-widest">月曜だけも特別なひと時を</p>
+          <p className="text-matcha-600 text-sm mt-4 tracking-widest">月曜の特別なひと時を</p>
           <h1 className="text-2xl font-serif text-matcha-800 mt-1">お茶と甘いもの　あまらんす</h1>
           <p className="text-gray-500 text-sm mt-2">毎週月曜日　９時３０分〜16時</p>
-          <p className="text-gray-500 text-sm">手作りお菓子でゆったりお過ごしください</p>
+          <p className="text-gray-500 text-sm">手作りお菓子とゆったりお過ごしください</p>
           <div className="mt-5 border-t border-matcha-100" />
         </div>
 
@@ -428,17 +429,27 @@ export default function ReservePage() {
                 <p className="text-gray-500 text-sm">メニューを読み込み中...</p>
               ) : (
                 <div className="space-y-4">
-                  {menus.map((menu) => (
-                    <div key={menu.id} className="border border-gray-200 rounded-lg p-4">
+                  {menus.map((menu) => {
+                    const soldOut = menu.stock === 0;
+                    return (
+                    <div key={menu.id} className={`border rounded-lg p-4 ${soldOut ? 'border-gray-200 bg-gray-50 opacity-60' : 'border-gray-200'}`}>
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <p className="font-medium">{menu.name}</p>
-                          {menu.description && <p className="text-xs text-gray-500">{menu.description}</p>}
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{menu.name}</p>
+                            {soldOut && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-medium">本日完売</span>
+                            )}
+                            {!soldOut && menu.stock !== null && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">残り{menu.stock}個</span>
+                            )}
+                          </div>
+                          {menu.description && <p className="text-xs text-gray-500 mt-0.5">{menu.description}</p>}
                         </div>
                         <p className="text-matcha-700 font-semibold ml-4">¥{menu.price.toLocaleString()}</p>
                       </div>
 
-                      {reservationType === 'seat_with_food' && (
+                      {!soldOut && reservationType === 'seat_with_food' && (
                         <div className="flex items-center gap-3 mb-2">
                           <span className="text-sm text-gray-600 w-24">イートイン</span>
                           <div className="flex items-center gap-2">
@@ -449,16 +460,19 @@ export default function ReservePage() {
                         </div>
                       )}
 
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm text-gray-600 w-24">お持ち帰り</span>
-                        <div className="flex items-center gap-2">
-                          <button type="button" onClick={() => updateItemQuantity(menu.id, menu.name, menu.price, Math.max(0, getItemQuantity(menu.id, true) - 1), true)} className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-matcha-400">−</button>
-                          <span className="w-6 text-center font-medium">{getItemQuantity(menu.id, true)}</span>
-                          <button type="button" onClick={() => updateItemQuantity(menu.id, menu.name, menu.price, getItemQuantity(menu.id, true) + 1, true)} className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-matcha-400">＋</button>
+                      {!soldOut && (
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm text-gray-600 w-24">お持ち帰り</span>
+                          <div className="flex items-center gap-2">
+                            <button type="button" onClick={() => updateItemQuantity(menu.id, menu.name, menu.price, Math.max(0, getItemQuantity(menu.id, true) - 1), true)} className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-matcha-400">−</button>
+                            <span className="w-6 text-center font-medium">{getItemQuantity(menu.id, true)}</span>
+                            <button type="button" onClick={() => updateItemQuantity(menu.id, menu.name, menu.price, getItemQuantity(menu.id, true) + 1, true)} className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-matcha-400">＋</button>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 

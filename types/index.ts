@@ -17,6 +17,7 @@ export interface Menu {
   price: number;
   is_available: boolean;
   sort_order: number;
+  stock: number | null;
   created_at: string;
   updated_at: string;
 }

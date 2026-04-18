@@ -27,8 +27,8 @@ export default function AdminMenuPage() {
 
     const method = isNew ? 'POST' : 'PATCH';
     const body = isNew
-      ? { name: editing.name, description: editing.description, price: editing.price ?? 0, is_available: editing.is_available ?? true, sort_order: editing.sort_order ?? 0 }
-      : { id: editing.id, name: editing.name, description: editing.description, price: editing.price, is_available: editing.is_available, sort_order: editing.sort_order };
+      ? { name: editing.name, description: editing.description, price: editing.price ?? 0, is_available: editing.is_available ?? true, sort_order: editing.sort_order ?? 0, stock: editing.stock ?? null }
+      : { id: editing.id, name: editing.name, description: editing.description, price: editing.price, is_available: editing.is_available, sort_order: editing.sort_order, stock: editing.stock ?? null };
 
     const res = await fetch('/api/admin/menu', {
       method,
@@ -181,6 +181,17 @@ export default function AdminMenuPage() {
                   onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) })}
                   className="input"
                   min="0"
+                />
+              </div>
+              <div>
+                <label className="label">本日の在庫数（空欄＝無制限、0＝完売）</label>
+                <input
+                  type="number"
+                  value={editing.stock ?? ''}
+                  onChange={(e) => setEditing({ ...editing, stock: e.target.value === '' ? null : Number(e.target.value) })}
+                  className="input"
+                  min="0"
+                  placeholder="例: 8（空欄で無制限）"
                 />
               </div>
               <label className="flex items-center gap-2 text-sm cursor-pointer">

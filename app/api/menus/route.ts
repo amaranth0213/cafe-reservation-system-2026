@@ -5,7 +5,7 @@ export async function GET() {
   const supabase = createServerClient();
   const { data } = await supabase
     .from('menus')
-    .select('id, name, description, price')
+    .select('id, name, description, price, stock')
     .eq('is_available', true)
     .order('sort_order');
 
