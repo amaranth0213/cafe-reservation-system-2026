@@ -15,7 +15,7 @@ export default async function HomePage() {
       <section className="bg-matcha-700 text-white py-20 px-4">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-4xl font-serif font-semibold mb-4 leading-tight">
-            お茶と甘いものあまらんす
+            お茶とあまいものあまらんす
           </h1>
           <p className="text-matcha-100 text-lg mb-2 leading-relaxed">
             毎週月曜日、９：３０〜１６：００（３部制）
