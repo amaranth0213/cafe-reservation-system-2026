@@ -88,6 +88,50 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // お菓子の在庫チェック
+  if (Array.isArray(order_items) && order_items.length > 0) {
+    const menuIds = order_items.filter((i: { quantity: number }) => i.quantity > 0).map((i: { menu_id: string }) => i.menu_id);
+    if (menuIds.length > 0) {
+      const { data: menuStocks } = await supabase
+        .from('menus')
+        .select('id, name, stock')
+        .in('id', menuIds);
+
+      for (const menu of menuStocks ?? []) {
+        if (menu.stock === null) continue; // 制限なし
+        const requested = order_items
+          .filter((i: { menu_id: string }) => i.menu_id === menu.id)
+          .reduce((sum: number, i: { quantity: number }) => sum + i.quantity, 0);
+
+        // 当日の注文済み数を取得
+        let orderedCount = 0;
+        if (time_slot_id) {
+          const { data: tsData } = await supabase.from('time_slots').select('business_day_id').eq('id', time_slot_id).single();
+          if (tsData) {
+            const { data: daySlots } = await supabase.from('time_slots').select('id').eq('business_day_id', tsData.business_day_id);
+            const slotIds = (daySlots ?? []).map((s: { id: string }) => s.id);
+            if (slotIds.length > 0) {
+              const { data: rIds } = await supabase.from('reservations').select('id').in('time_slot_id', slotIds).eq('status', 'confirmed');
+              const reservationIds = (rIds ?? []).map((r: { id: string }) => r.id);
+              if (reservationIds.length > 0) {
+                const { data: items } = await supabase.from('reservation_items').select('quantity').in('reservation_id', reservationIds).eq('menu_id', menu.id);
+                orderedCount = (items ?? []).reduce((sum: number, i: { quantity: number }) => sum + i.quantity, 0);
+              }
+            }
+          }
+        }
+
+        if (orderedCount + requested > menu.stock) {
+          const remaining = Math.max(0, menu.stock - orderedCount);
+          return NextResponse.json(
+            { error: `「${menu.name}」の残り数は${remaining}個です。数量を減らしてください。` },
+            { status: 409 }
+          );
+        }
+      }
+    }
+  }
+
   // 予約コード生成（重複チェック）
   let reservationCode = generateReservationCode();
   let attempts = 0;

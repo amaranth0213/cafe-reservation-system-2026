@@ -35,6 +35,7 @@ interface MenuData {
   price: number;
   description: string | null;
   stock: number | null;
+  remaining: number | null; // 当日の残り数（注文済みを引いた値）
   is_takeout_available: boolean;
 }
 
@@ -85,11 +86,16 @@ export default function ReservePage() {
       .catch(() => setError('日程データの取得に失敗しました'));
   }, []);
 
-  // メニュー・座席種別データ取得
+  // 座席種別データ取得
   useEffect(() => {
-    fetch('/api/menus').then((r) => r.json()).then(setMenus).catch(() => {});
     fetch('/api/seat-types').then((r) => r.json()).then(setSeatTypes).catch(() => {});
   }, []);
+
+  // メニュー取得：日付が確定したら残り数付きで再取得
+  useEffect(() => {
+    const url = selectedDate ? `/api/menus?date=${selectedDate}` : '/api/menus';
+    fetch(url).then((r) => r.json()).then(setMenus).catch(() => {});
+  }, [selectedDate]);
 
   // 日付選択時に空席情報を取得
   useEffect(() => {
@@ -431,7 +437,7 @@ export default function ReservePage() {
               ) : (
                 <div className="space-y-4">
                   {menus.map((menu) => {
-                    const soldOut = menu.stock === 0;
+                    const soldOut = menu.remaining === 0;
                     return (
                     <div key={menu.id} className={`border rounded-lg p-4 ${soldOut ? 'border-gray-200 bg-gray-50 opacity-60' : 'border-gray-200'}`}>
                       <div className="flex justify-between items-start mb-3">
@@ -441,8 +447,10 @@ export default function ReservePage() {
                             {soldOut && (
                               <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-medium">本日完売</span>
                             )}
-                            {!soldOut && menu.stock !== null && (
-                              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">本日{menu.stock}個限定</span>
+                            {!soldOut && menu.remaining !== null && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
+                                残り{menu.remaining}個
+                              </span>
                             )}
                             {!menu.is_takeout_available && (
                               <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-600 font-medium">イートインのみ</span>
