@@ -78,7 +78,7 @@ export default async function HomePage() {
       {/* フッター */}
       <footer className="bg-matcha-900 text-matcha-200 py-8 px-4 text-center text-sm">
         <p className="mb-2">キャンセルは Instagram DMにてご連絡ください</p>
-        <p className="text-matcha-400 text-xs">© 2026 手作りお菓子カフェ</p>
+        <p className="text-matcha-400 text-xs">© 2026 お茶と甘いもの　あまらんす</p>
       </footer>
     </main>
   );
