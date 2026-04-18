@@ -1,15 +1,13 @@
 import Link from 'next/link';
+import { createServerClient } from '@/lib/supabase/server';
 
-export default function HomePage() {
-  const menus = [
-    '抹茶のテリーヌ',
-    '低糖質の抹茶のシフォンケーキ',
-    '抹茶のアフォガード',
-    'オレンショコラケーキ',
-    'ほうじ茶プリン',
-    '苺大福',
-    'パリパリもなか',
-  ];
+export default async function HomePage() {
+  const supabase = createServerClient();
+  const { data: menus } = await supabase
+    .from('menus')
+    .select('id, name')
+    .eq('is_available', true)
+    .order('sort_order');
 
   return (
     <main className="min-h-screen">
@@ -21,7 +19,7 @@ export default function HomePage() {
             手作りお菓子カフェ
           </h1>
           <p className="text-matcha-100 text-lg mb-10 leading-relaxed">
-            毎週月曜日、9:30〜14:00（3部制）<br />
+            毎週月曜日、9:30〜16:00（3部制）<br />
             丁寧に作った和と洋のお菓子をどうぞ
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -63,9 +61,9 @@ export default function HomePage() {
           <h2 className="text-2xl font-serif text-center text-matcha-800 mb-2">本日のお菓子</h2>
           <p className="text-center text-sm text-gray-500 mb-8">季節によってメニューが変わります</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {menus.map((name) => (
-              <div key={name} className="bg-white rounded-lg p-4 border border-cream-200 text-center text-sm font-medium text-gray-700 shadow-sm">
-                {name}
+            {(menus ?? []).map((menu) => (
+              <div key={menu.id} className="bg-white rounded-lg p-4 border border-cream-200 text-center text-sm font-medium text-gray-700 shadow-sm">
+                {menu.name}
               </div>
             ))}
           </div>
