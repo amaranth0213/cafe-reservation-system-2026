@@ -199,7 +199,7 @@ export default function ReservePage() {
         {/* ヘッダー */}
         <div className="text-center mb-8">
           <Link href="/" className="text-matcha-600 text-sm hover:underline">← トップへ戻る</Link>
-          <h1 className="text-2xl font-serif text-matcha-800 mt-3">お茶とあまいものあまらんす</h1>
+          <h1 className="text-2xl font-serif text-matcha-800 mt-3"><span className="text-base">お茶とあまいもの</span>　あまらんす</h1>
           <p className="text-gray-500 text-sm mt-2">毎週月曜日、９：３０〜１６：００（３部制）</p>
           <p className="text-gray-500 text-sm">手作りお菓子をゆっくりお楽しみください</p>
           <div className="mt-5 border-t border-matcha-100" />
