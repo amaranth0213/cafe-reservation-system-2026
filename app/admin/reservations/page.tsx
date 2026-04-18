@@ -92,6 +92,37 @@ export default function AdminReservationsPage() {
         </div>
       </div>
 
+      {/* お菓子の注文集計 */}
+      {!loading && reservations.length > 0 && (() => {
+        const totals: Record<string, { name: string; eatIn: number; takeout: number }> = {};
+        reservations.filter(r => r.status === 'confirmed').forEach(r => {
+          (r.reservation_items ?? []).forEach(item => {
+            const name = item.menus?.name ?? '不明';
+            if (!totals[name]) totals[name] = { name, eatIn: 0, takeout: 0 };
+            if (item.is_takeout) totals[name].takeout += item.quantity;
+            else totals[name].eatIn += item.quantity;
+          });
+        });
+        const entries = Object.values(totals);
+        if (entries.length === 0) return null;
+        return (
+          <div className="bg-matcha-50 rounded-xl border border-matcha-200 p-5">
+            <h2 className="font-semibold text-matcha-800 mb-3">🍵 お菓子の注文集計（確定分）</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {entries.map(e => (
+                <div key={e.name} className="bg-white rounded-lg px-4 py-2 flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-700">{e.name}</span>
+                  <div className="flex gap-3 text-sm">
+                    {e.eatIn > 0 && <span className="text-matcha-700">イートイン <strong>{e.eatIn}個</strong></span>}
+                    {e.takeout > 0 && <span className="text-amber-700">テイクアウト <strong>{e.takeout}個</strong></span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* テーブル */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {loading ? (
@@ -109,6 +140,7 @@ export default function AdminReservationsPage() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">電話番号</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">タイプ</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">席</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">注文お菓子</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">ステータス</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">操作</th>
                 </tr>
@@ -133,6 +165,20 @@ export default function AdminReservationsPage() {
                       </td>
                       <td className="px-4 py-3 text-gray-600">
                         {r.seat_types ? `${SEAT_LABELS[r.seat_types.category]}・${r.party_size}名` : '-'}
+                      </td>
+                      <td className="px-4 py-3">
+                        {(r.reservation_items ?? []).length === 0 ? (
+                          <span className="text-gray-400 text-xs">なし</span>
+                        ) : (
+                          <div className="space-y-0.5">
+                            {(r.reservation_items ?? []).map(item => (
+                              <div key={item.id} className="text-xs text-gray-600">
+                                {item.menus?.name} ×{item.quantity}
+                                {item.is_takeout && <span className="ml-1 text-amber-600">（持帰）</span>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         {r.status === 'confirmed' ? (
