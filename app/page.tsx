@@ -14,13 +14,14 @@ export default async function HomePage() {
       {/* ヒーローセクション */}
       <section className="bg-matcha-700 text-white py-20 px-4">
         <div className="max-w-2xl mx-auto text-center">
-          <p className="text-matcha-200 text-sm tracking-widest mb-3 font-sans">月曜日だけの、特別なひととき</p>
-          <h1 className="text-4xl font-serif font-semibold mb-6 leading-tight">
-            手作りお菓子カフェ
+          <h1 className="text-4xl font-serif font-semibold mb-4 leading-tight">
+            お茶と甘いものあまらんす
           </h1>
-          <p className="text-matcha-100 text-lg mb-10 leading-relaxed">
-            毎週月曜日、9:30〜16:00（3部制）<br />
-            丁寧に作った和と洋のお菓子をどうぞ
+          <p className="text-matcha-100 text-lg mb-2 leading-relaxed">
+            毎週月曜日、９：３０〜１６：００（３部制）
+          </p>
+          <p className="text-matcha-100 text-base mb-10 leading-relaxed">
+            手作りお菓子をゆっくりお楽しみください
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/reserve" className="bg-white text-matcha-700 font-semibold px-8 py-4 rounded-xl hover:bg-cream-100 transition-colors text-center shadow-md">
@@ -58,7 +59,7 @@ export default async function HomePage() {
       {/* メニュー紹介 */}
       <section className="py-14 px-4 bg-cream-50">
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-2xl font-serif text-center text-matcha-800 mb-2">本日のお菓子</h2>
+          <h2 className="text-2xl font-serif text-center text-matcha-800 mb-2">お菓子のメニュー（都合により変更されることがあります）</h2>
           <p className="text-center text-sm text-gray-500 mb-8">季節によってメニューが変わります</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {(menus ?? []).map((menu) => (
@@ -78,7 +79,7 @@ export default async function HomePage() {
       {/* フッター */}
       <footer className="bg-matcha-900 text-matcha-200 py-8 px-4 text-center text-sm">
         <p className="mb-2">キャンセルは Instagram DMにてご連絡ください</p>
-        <p className="text-matcha-400 text-xs">© 2026 お茶と甘いもの　あまらんす</p>
+        <p className="text-matcha-400 text-xs">© 2026 お茶とあまいもの　あまらんす</p>
       </footer>
     </main>
   );
