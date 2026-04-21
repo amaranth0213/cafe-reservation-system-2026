@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAdminAuthenticated } from '@/lib/auth';
 import { createServerClient } from '@/lib/supabase/server';
+import { generateReservationCode } from '@/lib/business-days';
+import { getSlotAvailability, closeSlotIfFull } from '@/lib/availability';
+import type { ReservationType, OrderItem } from '@/types';
 
 export async function GET(request: NextRequest) {
   if (!(await isAdminAuthenticated())) {
@@ -67,4 +70,106 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json(data ?? []);
+}
+
+// 管理者による手動予約作成（木曜・土曜の制限なし）
+export async function POST(request: NextRequest) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: '認証が必要です' }, { status: 401 });
+  }
+
+  let body: {
+    time_slot_id?: string;
+    reservation_type: ReservationType;
+    seat_type_id?: string;
+    party_size?: number;
+    customer_name: string;
+    customer_phone: string;
+    notes?: string;
+    items?: OrderItem[];
+  };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: '無効なリクエストです' }, { status: 400 });
+  }
+
+  const { reservation_type, customer_name, customer_phone, time_slot_id, seat_type_id, party_size, notes, items } = body;
+
+  if (!reservation_type || !customer_name?.trim() || !customer_phone?.trim()) {
+    return NextResponse.json({ error: '名前と電話番号は必須です' }, { status: 400 });
+  }
+
+  const supabase = createServerClient();
+
+  // 空席確認
+  if (time_slot_id && seat_type_id) {
+    const availability = await getSlotAvailability(time_slot_id);
+    if (!availability) {
+      return NextResponse.json({ error: '指定の時間帯が見つかりません' }, { status: 404 });
+    }
+    const { data: seatTypeData } = await supabase
+      .from('seat_types')
+      .select('category, capacity')
+      .eq('id', seat_type_id)
+      .single();
+
+    if (seatTypeData) {
+      const targetSeat = availability.seats.find((s) => s.category === seatTypeData.category);
+      if (!targetSeat || targetSeat.remaining <= 0) {
+        return NextResponse.json({ error: 'この席種は満席です' }, { status: 409 });
+      }
+      if (party_size && party_size > seatTypeData.capacity) {
+        return NextResponse.json({ error: `${seatTypeData.capacity}人席に${party_size}人は座れません` }, { status: 400 });
+      }
+    }
+  }
+
+  // 予約コード生成
+  let reservationCode = generateReservationCode();
+  for (let i = 0; i < 5; i++) {
+    const { data: existing } = await supabase.from('reservations').select('id').eq('reservation_code', reservationCode).single();
+    if (!existing) break;
+    reservationCode = generateReservationCode();
+  }
+
+  // 予約作成
+  const { data: reservation, error: insertError } = await supabase
+    .from('reservations')
+    .insert({
+      reservation_code: reservationCode,
+      time_slot_id: time_slot_id ?? null,
+      reservation_type,
+      customer_name: customer_name.trim(),
+      customer_phone: customer_phone.trim(),
+      party_size: party_size ?? null,
+      seat_type_id: seat_type_id ?? null,
+      notes: notes?.trim() ?? null,
+    })
+    .select()
+    .single();
+
+  if (insertError || !reservation) {
+    return NextResponse.json({ error: '予約の作成に失敗しました' }, { status: 500 });
+  }
+
+  // お菓子注文の保存
+  if (items && items.length > 0) {
+    const itemsToInsert = items.filter((i) => i.quantity > 0).map((i) => ({
+      reservation_id: reservation.id,
+      menu_id: i.menu_id,
+      quantity: i.quantity,
+      unit_price: i.unit_price,
+      is_takeout: i.is_takeout,
+    }));
+    if (itemsToInsert.length > 0) {
+      await supabase.from('reservation_items').insert(itemsToInsert);
+    }
+  }
+
+  if (time_slot_id) {
+    await closeSlotIfFull(time_slot_id);
+  }
+
+  return NextResponse.json({ reservation_code: reservation.reservation_code, id: reservation.id }, { status: 201 });
 }

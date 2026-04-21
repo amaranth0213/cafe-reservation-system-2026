@@ -5,6 +5,10 @@ import type { Reservation } from '@/types';
 import { RESERVATION_TYPE_LABELS, SEAT_LABELS, SLOT_TIME_LABELS } from '@/types';
 import { formatDateJP } from '@/lib/business-days';
 
+interface SlotOption { id: string; slot_time: string; }
+interface SeatOption { id: string; seat_type_id?: string; category: string; capacity: number; remaining: number; }
+interface DayOption { id: string; date: string; slots: SlotOption[]; }
+
 export default function AdminReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +19,70 @@ export default function AdminReservationsPage() {
   const [reopenSlot, setReopenSlot] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [message, setMessage] = useState('');
+
+  // 手動予約フォーム
+  const [showNewForm, setShowNewForm] = useState(false);
+  const [days, setDays] = useState<DayOption[]>([]);
+  const [newDate, setNewDate] = useState('');
+  const [newSlotId, setNewSlotId] = useState('');
+  const [newSeatTypeId, setNewSeatTypeId] = useState('');
+  const [newPartySize, setNewPartySize] = useState(1);
+  const [newType, setNewType] = useState<'seat_only'|'seat_with_food'|'takeout'>('seat_only');
+  const [newName, setNewName] = useState('');
+  const [newPhone, setNewPhone] = useState('');
+  const [newNotes, setNewNotes] = useState('');
+  const [seatOptions, setSeatOptions] = useState<SeatOption[]>([]);
+  const [creating, setCreating] = useState(false);
+
+  // 管理者用：全営業日を取得（木曜制限なし）
+  const fetchDays = useCallback(async () => {
+    const res = await fetch('/api/admin/settings/days');
+    const data = await res.json();
+    setDays(Array.isArray(data) ? data : []);
+  }, []);
+
+  useEffect(() => { if (showNewForm) fetchDays(); }, [showNewForm, fetchDays]);
+
+  // 日付・スロット選択時に空席情報を取得
+  useEffect(() => {
+    if (!newSlotId) { setSeatOptions([]); return; }
+    fetch(`/api/availability?slot_id=${newSlotId}`)
+      .then(r => r.json())
+      .then(data => {
+        setSeatOptions((data.seats ?? []).map((s: SeatOption) => s));
+      }).catch(() => {});
+  }, [newSlotId]);
+
+  const handleCreateReservation = async () => {
+    if (!newName.trim() || !newPhone.trim()) return;
+    setCreating(true);
+    const body: Record<string, unknown> = {
+      reservation_type: newType,
+      customer_name: newName,
+      customer_phone: newPhone,
+      notes: newNotes || undefined,
+    };
+    if (newType !== 'takeout') {
+      body.time_slot_id = newSlotId;
+      body.seat_type_id = newSeatTypeId;
+      body.party_size = newPartySize;
+    }
+    const res = await fetch('/api/admin/reservations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setMessage(`予約を作成しました（予約番号: ${data.reservation_code}）`);
+      setShowNewForm(false);
+      setNewDate(''); setNewSlotId(''); setNewSeatTypeId(''); setNewName(''); setNewPhone(''); setNewNotes(''); setNewPartySize(1); setNewType('seat_only');
+      fetchReservations();
+    } else {
+      setMessage(data.error ?? '作成に失敗しました');
+    }
+    setCreating(false);
+  };
 
   const fetchReservations = useCallback(async () => {
     setLoading(true);
@@ -59,10 +127,96 @@ export default function AdminReservationsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-serif text-gray-800">予約一覧</h1>
-        <a href="/api/admin/export" className="btn-secondary text-sm py-2 px-4">
-          CSV出力
-        </a>
+        <div className="flex gap-2">
+          <button onClick={() => setShowNewForm(true)} className="btn-primary text-sm py-2 px-4">
+            ＋ 予約を手動登録
+          </button>
+          <a href="/api/admin/export" className="btn-secondary text-sm py-2 px-4">
+            CSV出力
+          </a>
+        </div>
       </div>
+
+      {/* 手動予約フォーム */}
+      {showNewForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl my-4">
+            <h3 className="text-lg font-semibold mb-4">予約を手動登録</h3>
+            <p className="text-xs text-matcha-600 bg-matcha-50 rounded-lg px-3 py-2 mb-4">受付期間前でも登録できます（管理者専用）</p>
+            <div className="space-y-4">
+              <div>
+                <label className="label">予約タイプ</label>
+                <select value={newType} onChange={e => { setNewType(e.target.value as typeof newType); setNewSlotId(''); setNewSeatTypeId(''); }} className="input">
+                  <option value="seat_only">席のみ</option>
+                  <option value="seat_with_food">席＋お菓子</option>
+                  <option value="takeout">お持ち帰りのみ</option>
+                </select>
+              </div>
+              {newType !== 'takeout' && (
+                <>
+                  <div>
+                    <label className="label">日程</label>
+                    <select value={newDate} onChange={e => { setNewDate(e.target.value); setNewSlotId(''); setNewSeatTypeId(''); }} className="input">
+                      <option value="">選択してください</option>
+                      {days.map(d => <option key={d.id} value={d.date}>{formatDateJP(d.date)}</option>)}
+                    </select>
+                  </div>
+                  {newDate && (
+                    <div>
+                      <label className="label">時間帯</label>
+                      <select value={newSlotId} onChange={e => { setNewSlotId(e.target.value); setNewSeatTypeId(''); }} className="input">
+                        <option value="">選択してください</option>
+                        {days.find(d => d.date === newDate)?.slots.map(s => (
+                          <option key={s.id} value={s.id}>{SLOT_TIME_LABELS[s.slot_time as keyof typeof SLOT_TIME_LABELS] ?? s.slot_time}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {newSlotId && seatOptions.length > 0 && (
+                    <div>
+                      <label className="label">席種</label>
+                      <select value={newSeatTypeId} onChange={e => { setNewSeatTypeId(e.target.value); setNewPartySize(1); }} className="input">
+                        <option value="">選択してください</option>
+                        {seatOptions.map(s => (
+                          <option key={s.id} value={s.seat_type_id ?? s.id} disabled={s.remaining === 0}>
+                            {SEAT_LABELS[s.category as keyof typeof SEAT_LABELS]}（残{s.remaining}卓）
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  {newSeatTypeId && (
+                    <div>
+                      <label className="label">人数</label>
+                      <select value={newPartySize} onChange={e => setNewPartySize(Number(e.target.value))} className="input">
+                        {[1,2,3,4].map(n => <option key={n} value={n}>{n}名</option>)}
+                      </select>
+                    </div>
+                  )}
+                </>
+              )}
+              <div>
+                <label className="label">お名前 *</label>
+                <input type="text" value={newName} onChange={e => setNewName(e.target.value)} className="input" placeholder="山田 花子" />
+              </div>
+              <div>
+                <label className="label">電話番号 *</label>
+                <input type="tel" value={newPhone} onChange={e => setNewPhone(e.target.value)} className="input" placeholder="090-1234-5678" />
+              </div>
+              <div>
+                <label className="label">備考</label>
+                <input type="text" value={newNotes} onChange={e => setNewNotes(e.target.value)} className="input" placeholder="アレルギーなど" />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowNewForm(false)} className="btn-secondary flex-1 py-2">キャンセル</button>
+              <button onClick={handleCreateReservation} disabled={creating || !newName.trim() || !newPhone.trim()} className="btn-primary flex-1 py-2">
+                {creating ? '登録中...' : '予約を登録'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {message && (
         <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
