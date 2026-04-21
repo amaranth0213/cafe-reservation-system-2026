@@ -1,7 +1,7 @@
 export type SeatCategory = 'single' | 'double' | 'quad';
 export type ReservationType = 'seat_only' | 'seat_with_food' | 'takeout';
 export type ReservationStatus = 'confirmed' | 'cancelled';
-export type SlotTime = '09:30' | '12:00' | '14:00';
+export type SlotTime = '09:30' | '11:30' | '13:30';
 
 export interface SeatType {
   id: string;
@@ -122,8 +122,8 @@ export const SEAT_LABELS: Record<SeatCategory, string> = {
 
 export const SLOT_TIME_LABELS: Record<SlotTime, string> = {
   '09:30': '9:30〜',
-  '12:00': '12:00〜',
-  '14:00': '14:00〜',
+  '11:30': '11:30〜',
+  '13:30': '13:30〜',
 };
 
 export const RESERVATION_TYPE_LABELS: Record<ReservationType, string> = {

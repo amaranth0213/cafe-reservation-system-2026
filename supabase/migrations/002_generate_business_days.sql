@@ -26,7 +26,7 @@ BEGIN
     INSERT INTO time_slots (business_day_id, slot_time, is_accepting)
     SELECT id, slot_time, true
     FROM business_days
-    CROSS JOIN (VALUES ('09:30'), ('12:00'), ('14:00')) AS slots(slot_time)
+    CROSS JOIN (VALUES ('09:30'), ('11:30'), ('13:30')) AS slots(slot_time)
     WHERE date = target_date
     ON CONFLICT (business_day_id, slot_time) DO NOTHING;
   END LOOP;

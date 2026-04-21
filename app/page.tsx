@@ -19,7 +19,7 @@ export default async function HomePage() {
             <span className="block">あまらんす</span>
           </h1>
           <p className="text-matcha-100 text-lg mb-2 leading-relaxed">
-            毎週月曜日、９：３０〜１６：００（３部制）
+            毎週月曜日、９：３０〜１５：３０（３部制）
           </p>
           <p className="text-matcha-100 text-base mb-10 leading-relaxed">
             手作りお菓子をゆっくりお楽しみください
@@ -42,7 +42,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
               { label: '営業日', value: '毎週月曜日' },
-              { label: '時間帯', value: '9:30 / 12:00 / 14:00' },
+              { label: '時間帯', value: '9:30 / 11:30 / 13:30' },
               { label: '席数', value: '11席（要予約）' },
             ].map((item) => (
               <div key={item.label} className="text-center p-5 rounded-xl bg-cream-50 border border-cream-200">

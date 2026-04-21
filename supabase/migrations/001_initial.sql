@@ -49,7 +49,7 @@ CREATE TABLE business_days (
 CREATE TABLE time_slots (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_day_id UUID NOT NULL REFERENCES business_days(id) ON DELETE CASCADE,
-  slot_time       TEXT NOT NULL CHECK (slot_time IN ('09:30', '12:00', '14:00')),
+  slot_time       TEXT NOT NULL CHECK (slot_time IN ('09:30', '11:30', '13:30')),
   is_accepting    BOOLEAN NOT NULL DEFAULT true,
   UNIQUE (business_day_id, slot_time)
 );
