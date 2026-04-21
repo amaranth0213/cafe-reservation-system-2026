@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'お茶とあまいもの あまらんす | ご予約',
+  title: 'お茶と甘いもの あまらんす | ご予約',
   description: '毎週月曜日、９：３０〜１６：００（３部制）。手作りお菓子をゆっくりお楽しみください。',
   openGraph: {
-    title: 'お茶とあまいもの あまらんす',
+    title: 'お茶と甘いもの あまらんす',
     description: '毎週月曜日、９：３０〜１６：００（３部制）。席のご予約はこちらから。',
   },
 };

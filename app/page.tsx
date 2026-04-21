@@ -15,7 +15,7 @@ export default async function HomePage() {
       <section className="bg-cream-100 text-matcha-800 py-20 px-4 border-b border-cream-200">
         <div className="max-w-2xl mx-auto text-center">
           <h1 className="text-4xl font-serif font-light mb-4 leading-snug tracking-wide text-matcha-800">
-            <span className="block text-2xl text-matcha-600 mb-1">お茶とあまいもの</span>
+            <span className="block text-2xl text-matcha-600 mb-1">お茶と甘いもの</span>
             <span className="block">あまらんす</span>
           </h1>
           <p className="text-matcha-600 text-base mb-2 leading-relaxed">
@@ -80,7 +80,7 @@ export default async function HomePage() {
       {/* フッター */}
       <footer className="bg-cream-100 text-matcha-600 py-8 px-4 text-center text-sm border-t border-cream-200">
         <p className="mb-2">キャンセル・注文変更は Instagram DM にてご連絡ください</p>
-        <p className="text-matcha-400 text-xs">© 2026 お茶とあまいもの　あまらんす</p>
+        <p className="text-matcha-400 text-xs">© 2026 お茶と甘いもの　あまらんす</p>
       </footer>
     </main>
   );
