@@ -420,6 +420,9 @@ export default function ReservePage() {
                 {selectedSeatTypeId && (
                   <div>
                     <label className="label">人数</label>
+                    {maxPartySize === 1 ? (
+                      <p className="input bg-gray-50 text-gray-600 cursor-default">1名</p>
+                    ) : (
                     <select
                       value={partySize}
                       onChange={(e) => setPartySize(Number(e.target.value))}
@@ -429,6 +432,7 @@ export default function ReservePage() {
                         <option key={n} value={n}>{n}名</option>
                       ))}
                     </select>
+                    )}
                   </div>
                 )}
               </div>
