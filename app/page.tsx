@@ -43,7 +43,7 @@ export default async function HomePage() {
             {[
               { label: '営業日', value: '毎週月曜日' },
               { label: '時間帯', value: '9:30 / 11:30 / 13:30' },
-              { label: '席数', value: '11席（要予約）' },
+              { label: '席数', value: '9席（要予約）' },
             ].map((item) => (
               <div key={item.label} className="text-center p-5 rounded-xl bg-cream-50 border border-cream-200">
                 <p className="text-sm text-matcha-600 mb-1">{item.label}</p>
