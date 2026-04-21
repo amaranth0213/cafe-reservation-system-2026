@@ -7,7 +7,7 @@ import { formatDateJP } from '@/lib/business-days';
 
 interface SlotOption { id: string; slot_time: string; }
 interface SeatOption { seat_type_id: string; category: string; capacity: number; remaining: number; }
-interface DayOption { id: string; date: string; slots: SlotOption[]; }
+interface DayOption { id: string; date: string; time_slots: SlotOption[]; }
 
 export default function AdminReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -166,7 +166,7 @@ export default function AdminReservationsPage() {
                       <label className="label">時間帯</label>
                       <select value={newSlotId} onChange={e => { setNewSlotId(e.target.value); setNewSeatTypeId(''); }} className="input">
                         <option value="">選択してください</option>
-                        {days.find(d => d.date === newDate)?.slots.map(s => (
+                        {days.find(d => d.date === newDate)?.time_slots.map(s => (
                           <option key={s.id} value={s.id}>{SLOT_TIME_LABELS[s.slot_time as keyof typeof SLOT_TIME_LABELS] ?? s.slot_time}</option>
                         ))}
                       </select>
