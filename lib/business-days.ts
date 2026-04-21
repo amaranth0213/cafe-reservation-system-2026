@@ -40,10 +40,10 @@ export function formatDateJP(dateStr: string): string {
   return `${year}年${month}月${day}日（月）`;
 }
 
-// 予約受付開始日時：営業日（月曜）の4日前の木曜日12:00 JST
+// 予約受付開始日時：営業日（月曜）の3週間前の木曜日12:00 JST（テスト用・本番は4日前に戻す）
 export function getReservationOpenTime(mondayDate: string): Date {
   const monday = new Date(mondayDate + 'T00:00:00+09:00');
-  const thursday = new Date(monday.getTime() - 4 * 24 * 60 * 60 * 1000);
+  const thursday = new Date(monday.getTime() - 25 * 24 * 60 * 60 * 1000);
   // 木曜日12:00 JST = 木曜日 03:00 UTC
   return new Date(thursday.getTime() + 12 * 60 * 60 * 1000);
 }
