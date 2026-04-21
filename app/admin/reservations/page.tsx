@@ -20,6 +20,16 @@ export default function AdminReservationsPage() {
   const [cancelling, setCancelling] = useState(false);
   const [message, setMessage] = useState('');
 
+  // 編集モーダル
+  const [editTarget, setEditTarget] = useState<Reservation | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editPartySize, setEditPartySize] = useState(1);
+  const [editNotes, setEditNotes] = useState('');
+  const [editItems, setEditItems] = useState<{menu_id:string;menu_name:string;unit_price:number;quantity:number;is_takeout:boolean}[]>([]);
+  const [menus, setMenus] = useState<{id:string;name:string;price:number;is_takeout_available:boolean}[]>([]);
+  const [saving, setSaving] = useState(false);
+
   // 手動予約フォーム
   const [showNewForm, setShowNewForm] = useState(false);
   const [days, setDays] = useState<DayOption[]>([]);
@@ -99,6 +109,61 @@ export default function AdminReservationsPage() {
   useEffect(() => {
     fetchReservations();
   }, [fetchReservations]);
+
+  // 編集モーダルを開く
+  const openEdit = (r: Reservation) => {
+    setEditTarget(r);
+    setEditName(r.customer_name);
+    setEditPhone(r.customer_phone);
+    setEditPartySize(r.party_size ?? 1);
+    setEditNotes(r.notes ?? '');
+    setEditItems((r.reservation_items ?? []).map(i => ({
+      menu_id: i.menu_id,
+      menu_name: i.menus?.name ?? '',
+      unit_price: i.unit_price,
+      quantity: i.quantity,
+      is_takeout: i.is_takeout,
+    })));
+    // メニュー一覧を取得
+    fetch('/api/menus').then(r => r.json()).then(setMenus).catch(() => {});
+  };
+
+  const updateEditItem = (menuId: string, menuName: string, price: number, qty: number, isTakeout: boolean) => {
+    setEditItems(prev => {
+      const filtered = prev.filter(i => !(i.menu_id === menuId && i.is_takeout === isTakeout));
+      if (qty > 0) return [...filtered, { menu_id: menuId, menu_name: menuName, unit_price: price, quantity: qty, is_takeout: isTakeout }];
+      return filtered;
+    });
+  };
+
+  const getEditQty = (menuId: string, isTakeout: boolean) =>
+    editItems.find(i => i.menu_id === menuId && i.is_takeout === isTakeout)?.quantity ?? 0;
+
+  const handleSaveEdit = async () => {
+    if (!editTarget) return;
+    setSaving(true);
+    const res = await fetch(`/api/admin/reservations/${editTarget.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'edit',
+        customer_name: editName,
+        customer_phone: editPhone,
+        party_size: editPartySize,
+        notes: editNotes,
+        items: editItems,
+      }),
+    });
+    if (res.ok) {
+      setMessage('変更を保存しました');
+      setEditTarget(null);
+      fetchReservations();
+    } else {
+      const data = await res.json();
+      setMessage(data.error ?? '保存に失敗しました');
+    }
+    setSaving(false);
+  };
 
   const handleCancel = async () => {
     if (!cancelTarget) return;
@@ -343,12 +408,20 @@ export default function AdminReservationsPage() {
                       </td>
                       <td className="px-4 py-3">
                         {r.status === 'confirmed' && (
+                          <div className="flex gap-2">
+                          <button
+                            onClick={() => openEdit(r)}
+                            className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            編集
+                          </button>
                           <button
                             onClick={() => setCancelTarget(r)}
                             className="text-xs text-red-600 hover:text-red-800 font-medium"
                           >
                             キャンセル
                           </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -359,6 +432,70 @@ export default function AdminReservationsPage() {
           </div>
         )}
       </div>
+
+      {/* 編集モーダル */}
+      {editTarget && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl my-4">
+            <h3 className="text-lg font-semibold mb-1">予約を編集</h3>
+            <p className="text-sm text-gray-500 mb-4">{editTarget.reservation_code}</p>
+            <div className="space-y-4">
+              <div>
+                <label className="label">お名前</label>
+                <input type="text" value={editName} onChange={e => setEditName(e.target.value)} className="input" />
+              </div>
+              <div>
+                <label className="label">電話番号</label>
+                <input type="tel" value={editPhone} onChange={e => setEditPhone(e.target.value)} className="input" />
+              </div>
+              {editTarget.seat_type_id && (
+                <div>
+                  <label className="label">人数</label>
+                  <select value={editPartySize} onChange={e => setEditPartySize(Number(e.target.value))} className="input">
+                    {[1,2,3,4].map(n => <option key={n} value={n}>{n}名</option>)}
+                  </select>
+                </div>
+              )}
+              <div>
+                <label className="label">備考</label>
+                <input type="text" value={editNotes} onChange={e => setEditNotes(e.target.value)} className="input" placeholder="アレルギーなど" />
+              </div>
+              {(editTarget.reservation_type === 'seat_with_food' || editTarget.reservation_type === 'takeout') && menus.length > 0 && (
+                <div>
+                  <label className="label">お菓子の注文</label>
+                  <div className="space-y-3 mt-2">
+                    {menus.map(menu => (
+                      <div key={menu.id} className="border rounded-lg p-3">
+                        <p className="text-sm font-medium mb-2">{menu.name} <span className="text-gray-500">¥{menu.price}</span></p>
+                        <div className="flex items-center gap-3 text-sm">
+                          <span className="text-gray-600 w-20">イートイン</span>
+                          <button type="button" onClick={() => updateEditItem(menu.id, menu.name, menu.price, Math.max(0, getEditQty(menu.id, false)-1), false)} className="w-7 h-7 rounded-full border flex items-center justify-center">−</button>
+                          <span className="w-5 text-center">{getEditQty(menu.id, false)}</span>
+                          <button type="button" onClick={() => updateEditItem(menu.id, menu.name, menu.price, getEditQty(menu.id, false)+1, false)} className="w-7 h-7 rounded-full border flex items-center justify-center">＋</button>
+                        </div>
+                        {menu.is_takeout_available && (
+                          <div className="flex items-center gap-3 text-sm mt-1">
+                            <span className="text-gray-600 w-20">お持ち帰り</span>
+                            <button type="button" onClick={() => updateEditItem(menu.id, menu.name, menu.price, Math.max(0, getEditQty(menu.id, true)-1), true)} className="w-7 h-7 rounded-full border flex items-center justify-center">−</button>
+                            <span className="w-5 text-center">{getEditQty(menu.id, true)}</span>
+                            <button type="button" onClick={() => updateEditItem(menu.id, menu.name, menu.price, getEditQty(menu.id, true)+1, true)} className="w-7 h-7 rounded-full border flex items-center justify-center">＋</button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setEditTarget(null)} className="btn-secondary flex-1 py-2">戻る</button>
+              <button onClick={handleSaveEdit} disabled={saving || !editName.trim() || !editPhone.trim()} className="btn-primary flex-1 py-2">
+                {saving ? '保存中...' : '保存する'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* キャンセル確認モーダル */}
       {cancelTarget && (
