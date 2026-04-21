@@ -210,6 +210,7 @@ export default function ReservePage() {
           <h1 className="text-3xl font-serif text-matcha-800 mt-3"><span className="text-lg text-matcha-600">お茶と甘いもの</span>　あまらんす</h1>
           <p className="text-gray-600 text-base mt-2">毎週月曜日、９：３０〜１５：３０（３部制）</p>
           <p className="text-gray-600 text-sm">手作りお菓子をゆっくりお楽しみください</p>
+          <p className="text-xs text-gray-400 mt-2">※ デモ表示中</p>
           <div className="mt-5 border-t border-matcha-100" />
         </div>
 
