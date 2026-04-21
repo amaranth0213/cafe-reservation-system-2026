@@ -52,7 +52,7 @@ export default async function HomePage() {
             ))}
           </div>
           <div className="mt-8 p-5 rounded-xl bg-cream-50 border border-cream-200 text-sm text-matcha-700">
-            <strong className="font-normal">キャンセル・注文変更について：</strong>キャンセルや注文変更は Instagram のメッセージよりご連絡ください。
+            <strong className="font-normal">キャンセル・注文変更について：</strong>instagram のメッセージよりご連絡ください。また、当日お菓子も少しご用意しています。
           </div>
         </div>
       </section>
