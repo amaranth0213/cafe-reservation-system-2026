@@ -6,7 +6,7 @@ import { RESERVATION_TYPE_LABELS, SEAT_LABELS, SLOT_TIME_LABELS } from '@/types'
 import { formatDateJP } from '@/lib/business-days';
 
 interface SlotOption { id: string; slot_time: string; }
-interface SeatOption { id: string; seat_type_id?: string; category: string; capacity: number; remaining: number; }
+interface SeatOption { seat_type_id: string; category: string; capacity: number; remaining: number; }
 interface DayOption { id: string; date: string; slots: SlotOption[]; }
 
 export default function AdminReservationsPage() {
@@ -49,7 +49,7 @@ export default function AdminReservationsPage() {
     fetch(`/api/availability?slot_id=${newSlotId}`)
       .then(r => r.json())
       .then(data => {
-        setSeatOptions((data.seats ?? []).map((s: SeatOption) => s));
+        setSeatOptions(data.seats ?? []);
       }).catch(() => {});
   }, [newSlotId]);
 
@@ -178,7 +178,7 @@ export default function AdminReservationsPage() {
                       <select value={newSeatTypeId} onChange={e => { setNewSeatTypeId(e.target.value); setNewPartySize(1); }} className="input">
                         <option value="">選択してください</option>
                         {seatOptions.map(s => (
-                          <option key={s.id} value={s.seat_type_id ?? s.id} disabled={s.remaining === 0}>
+                          <option key={s.seat_type_id} value={s.seat_type_id} disabled={s.remaining === 0}>
                             {SEAT_LABELS[s.category as keyof typeof SEAT_LABELS]}（残{s.remaining}卓）
                           </option>
                         ))}
