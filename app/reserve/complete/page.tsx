@@ -33,9 +33,14 @@ export default async function CompletePage({ searchParams }: Props) {
             <p>・当日は予約番号をお伝えいただけるとスムーズです</p>
           </div>
 
-          <Link href="/" className="btn-secondary w-full block">
-            トップページへ戻る
-          </Link>
+          <div className="space-y-3">
+            <Link href={`/reserve/lookup?code=${code}`} className="btn-primary w-full block">
+              予約内容を確認する
+            </Link>
+            <Link href="/" className="btn-secondary w-full block">
+              トップページへ戻る
+            </Link>
+          </div>
         </div>
       </div>
     </main>
