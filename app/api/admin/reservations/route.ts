@@ -69,7 +69,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'データ取得に失敗しました' }, { status: 500 });
   }
 
-  return NextResponse.json(data ?? []);
+  // 日付・時間の早い順に並び替え（テイクアウト等スロットなしは末尾）
+  const sorted = (data ?? []).sort((a, b) => {
+    const aTs = a.time_slots as { slot_time: string; business_days?: { date: string } } | null | undefined;
+    const bTs = b.time_slots as { slot_time: string; business_days?: { date: string } } | null | undefined;
+    const aKey = aTs?.business_days?.date ? `${aTs.business_days.date} ${aTs.slot_time}` : 'zzzz';
+    const bKey = bTs?.business_days?.date ? `${bTs.business_days.date} ${bTs.slot_time}` : 'zzzz';
+    if (aKey !== bKey) return aKey.localeCompare(bKey);
+    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+  });
+
+  return NextResponse.json(sorted);
 }
 
 // 管理者による手動予約作成（木曜・土曜の制限なし）
