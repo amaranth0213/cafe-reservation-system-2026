@@ -635,8 +635,9 @@ export default function ReservePage() {
               </div>
             )}
 
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
-              キャンセル・注文変更は Instagram のメッセージよりご連絡ください。
+            <div className="p-4 bg-cream-50 border border-cream-200 rounded-xl text-sm text-gray-600 space-y-2">
+              <p><span className="font-normal text-matcha-700">キャンセル・注文変更について：</span>Instagramのメッセージよりご連絡ください。</p>
+              <p><span className="font-normal text-matcha-700">お菓子について：</span>予約時にご注文いただかない場合でも、当日ご用意のお菓子が少しございます。</p>
             </div>
 
             {error && (
