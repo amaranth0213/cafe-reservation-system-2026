@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { getSlotAvailability, getDayAvailability } from '@/lib/availability';
-import { isReservationOpen } from '@/lib/business-days';
 
 // GET /api/availability?date=2026-04-20 または ?slot_id=xxx
 export async function GET(request: NextRequest) {
@@ -23,10 +22,9 @@ export async function GET(request: NextRequest) {
       .from('business_days')
       .select('id, date, is_open, note')
       .eq('date', date)
-      .eq('is_open', true)
       .single();
 
-    if (!businessDay) {
+    if (!businessDay || !businessDay.is_open) {
       return NextResponse.json({ error: 'この日は営業していません' }, { status: 404 });
     }
 
@@ -34,7 +32,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ date: businessDay, slots });
   }
 
-  // 日付なしの場合: 今後8週分の営業日一覧
+  // 日付なしの場合: 今後3週分の営業日一覧（休業日・受付前も含む）
   const supabase = createServerClient();
   const today = new Date().toISOString().split('T')[0];
 
@@ -44,12 +42,9 @@ export async function GET(request: NextRequest) {
       id, date, is_open, note,
       time_slots (id, slot_time, is_accepting)
     `)
-    .eq('is_open', true)
     .gte('date', today)
     .order('date')
-    .limit(1);
+    .limit(3);
 
-  // 木曜日12時以降のみ受付開始
-  const openDays = (businessDays ?? []).filter(bd => isReservationOpen(bd.date));
-  return NextResponse.json(openDays);
+  return NextResponse.json(businessDays ?? []);
 }

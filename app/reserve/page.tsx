@@ -5,12 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { ReservationType, SeatCategory, SlotTime, OrderItem } from '@/types';
 import { SEAT_LABELS, SLOT_TIME_LABELS, RESERVATION_TYPE_LABELS } from '@/types';
-import { formatDateJP, isSweetsAvailable } from '@/lib/business-days';
+import { formatDateJP, isSweetsAvailable, isReservationOpen } from '@/lib/business-days';
 
 interface BusinessDayData {
   id: string;
   date: string;
   is_open: boolean;
+  note: string | null;
   time_slots: { id: string; slot_time: SlotTime; is_accepting: boolean }[];
 }
 
@@ -117,6 +118,12 @@ export default function ReservePage() {
 
   const selectedSeatType = seatTypes.find((s) => s.id === selectedSeatTypeId);
   const maxPartySize = selectedSeatType?.capacity ?? 4;
+
+  // 選択日が実際に予約可能か
+  const selectedDayData = businessDays.find(d => d.date === selectedDate);
+  const isSelectedDateBookable = selectedDayData
+    ? selectedDayData.is_open && isReservationOpen(selectedDayData.date)
+    : false;
 
   // STEP1の送信
   const handleStep1Submit = (e: React.FormEvent) => {
@@ -238,29 +245,67 @@ export default function ReservePage() {
             <div className="card">
               <h2 className="text-lg font-semibold text-matcha-800 mb-4">日程を選んでください</h2>
               {businessDays.length === 0 ? (
-                <p className="text-gray-500 text-sm">予約可能な日程を読み込み中...</p>
+                <p className="text-gray-500 text-sm">日程を読み込み中...</p>
               ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  {businessDays.map((bd) => (
-                    <button
-                      key={bd.id}
-                      type="button"
-                      onClick={() => setSelectedDate(bd.date)}
-                      className={`p-3 rounded-lg border text-sm font-medium transition-all ${
-                        selectedDate === bd.date
-                          ? 'border-matcha-500 bg-matcha-50 text-matcha-700'
-                          : 'border-gray-200 hover:border-matcha-300 text-gray-700'
-                      }`}
-                    >
-                      {formatDateJP(bd.date)}
-                    </button>
-                  ))}
+                <div className="grid grid-cols-1 gap-2">
+                  {businessDays.map((bd) => {
+                    const isClosed = !bd.is_open;
+                    const isBeforeOpen = bd.is_open && !isReservationOpen(bd.date);
+                    const isSelected = selectedDate === bd.date;
+                    return (
+                      <button
+                        key={bd.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedDate(bd.date);
+                          setSelectedSlotId('');
+                          setSelectedSlotTime('');
+                        }}
+                        className={`p-3 rounded-lg border text-sm text-left transition-all ${
+                          isSelected
+                            ? 'border-matcha-400 bg-matcha-50 text-matcha-700'
+                            : isClosed
+                            ? 'border-cream-200 bg-cream-50 text-gray-400 cursor-pointer'
+                            : isBeforeOpen
+                            ? 'border-cream-200 bg-cream-50 text-gray-500 cursor-pointer'
+                            : 'border-gray-200 hover:border-matcha-300 text-gray-700'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className={isClosed ? 'line-through text-gray-400' : ''}>{formatDateJP(bd.date)}</span>
+                          {isClosed && <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">休業日</span>}
+                          {isBeforeOpen && <span className="text-xs text-matcha-400 bg-cream-100 px-2 py-0.5 rounded-full">受付前</span>}
+                          {!isClosed && !isBeforeOpen && <span className="text-xs text-matcha-500 bg-matcha-100 px-2 py-0.5 rounded-full">受付中</span>}
+                        </div>
+                        {isClosed && bd.note && (
+                          <p className="text-xs text-gray-400 mt-1">{bd.note}</p>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
+
+              {/* 選択日のステータスメッセージ */}
+              {selectedDate && (() => {
+                const bd = businessDays.find(d => d.date === selectedDate);
+                if (!bd) return null;
+                if (!bd.is_open) return (
+                  <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500">
+                    この日は休業日です。{bd.note ? `（${bd.note}）` : ''}
+                  </div>
+                );
+                if (!isReservationOpen(bd.date)) return (
+                  <div className="mt-3 p-3 bg-cream-50 border border-cream-200 rounded-lg text-sm text-matcha-600">
+                    まだ予約受付期間前です。予約受付は営業日の４日前の木曜日お昼12時からとなります。
+                  </div>
+                );
+                return null;
+              })()}
             </div>
 
-            {/* 予約タイプ */}
-            <div className="card">
+            {/* 予約タイプ以降は予約可能な日付が選ばれたときのみ表示 */}
+            {isSelectedDateBookable && <div className="card">
               <h2 className="text-lg font-semibold text-matcha-800 mb-4">予約タイプ</h2>
               {selectedDate && !isSweetsAvailable(selectedDate) && (
                 <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
@@ -288,7 +333,7 @@ export default function ReservePage() {
                   </label>
                 ))}
               </div>
-            </div>
+            </div>}
 
             {/* 時間帯選択（テイクアウトのみ以外） */}
             {reservationType && reservationType !== 'takeout' && selectedDate && (
