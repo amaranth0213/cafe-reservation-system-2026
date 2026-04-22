@@ -34,7 +34,7 @@ export default async function HomePage() {
           </div>
           <div className="mt-5">
             <Link href="/reserve/lookup" className="text-matcha-600 text-sm underline underline-offset-4 hover:text-matcha-800 transition-colors">
-              予約内容の確認はこちら
+              ご予約内容の確認はこちら
             </Link>
           </div>
         </div>
@@ -92,7 +92,7 @@ export default async function HomePage() {
       <footer className="bg-cream-100 text-matcha-600 py-8 px-4 text-center text-sm border-t border-cream-200">
         <p className="mb-2">キャンセル・注文変更は Instagram DM にてご連絡ください</p>
         <Link href="/reserve/lookup" className="text-matcha-500 text-xs underline underline-offset-4 hover:text-matcha-700 transition-colors">
-          予約内容の確認
+          ご予約内容の確認
         </Link>
         <p className="text-matcha-500 text-xs mt-4">愛知県豊田市千石町3丁目５０９</p>
         <p className="text-matcha-400 text-xs mt-2">© 2026 お茶と甘いもの　あまらんす</p>
