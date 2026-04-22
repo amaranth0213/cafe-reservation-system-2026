@@ -56,6 +56,10 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
+          <div className="mt-6 p-5 rounded-xl bg-amber-50 border-l-4 border-amber-400 text-sm text-amber-900">
+            <p className="font-semibold mb-1">🗓 予約受付について</p>
+            <p>毎週月曜日の営業日分のご予約は、<strong className="font-semibold">その4日前（木曜日）の正午12時</strong>より受け付けております。</p>
+          </div>
           <div className="mt-8 space-y-3">
             <div className="p-5 bg-matcha-50 border-l-4 border-matcha-400 rounded-xl text-sm text-matcha-800">
               <p className="font-semibold mb-1">☕ お飲み物について</p>
