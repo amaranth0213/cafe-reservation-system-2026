@@ -375,7 +375,7 @@ export default function AdminReservationsPage() {
                           ? `${ts.business_days.date} ${ts.slot_time}`
                           : 'お持ち帰り'}
                       </td>
-                      <td className="px-4 py-3 font-medium">{r.customer_name}</td>
+                      <td className="px-4 py-3 font-medium">{r.customer_name}　様</td>
                       <td className="px-4 py-3 text-gray-600">{r.customer_phone}</td>
                       <td className="px-4 py-3">
                         <span className="text-xs px-2 py-1 bg-matcha-50 text-matcha-700 rounded">
