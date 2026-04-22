@@ -29,6 +29,7 @@ export default async function CompletePage({ searchParams }: Props) {
           <div className="text-sm text-gray-600 space-y-2 mb-8 text-left bg-gray-50 rounded-lg p-4">
             <p className="font-medium text-gray-700 mb-2">ご確認ください</p>
             <p>・この画面のスクリーンショットを保存してください</p>
+            <p>・お飲み物は当日お席についてからゆっくりお選びください</p>
             <p>・キャンセルの場合は Instagram のメッセージよりご連絡ください</p>
             <p>・当日は予約番号をお伝えいただけるとスムーズです</p>
           </div>
