@@ -206,7 +206,10 @@ export default function ReservePage() {
       <div className="max-w-xl mx-auto px-4 py-10">
         {/* ヘッダー */}
         <div className="text-center mb-8">
-          <Link href="/" className="text-matcha-600 text-sm hover:underline">← トップへ戻る</Link>
+          <div className="flex justify-between items-center">
+            <Link href="/" className="text-matcha-600 text-sm hover:underline">← トップへ戻る</Link>
+            <Link href="/reserve/lookup" className="text-matcha-500 text-xs underline underline-offset-4 hover:text-matcha-700">ご予約の確認はこちら</Link>
+          </div>
           <h1 className="text-3xl font-serif text-matcha-800 mt-3"><span className="text-lg text-matcha-600">お茶と甘いもの</span>　あまらんす</h1>
           <p className="text-gray-600 text-base mt-2">毎週月曜日、９：３０〜１５：３０（３部制）</p>
           <p className="text-gray-600 text-sm">手作りお菓子をゆっくりお楽しみください</p>
