@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { ReservationType, SeatCategory, SlotTime, OrderItem } from '@/types';
 import { SEAT_LABELS, SLOT_TIME_LABELS, RESERVATION_TYPE_LABELS } from '@/types';
-import { formatDateJP, isSweetsAvailable, isReservationOpen } from '@/lib/business-days';
+import { formatDateJP, isSweetsAvailable, isReservationOpen, getReservationOpenTimeLabel } from '@/lib/business-days';
 
 interface BusinessDayData {
   id: string;
@@ -298,7 +298,8 @@ export default function ReservePage() {
                 );
                 if (!isReservationOpen(bd.date)) return (
                   <div className="mt-3 p-3 bg-cream-50 border border-cream-200 rounded-lg text-sm text-matcha-600">
-                    まだ予約受付期間前です。予約受付は営業日の４日前の木曜日お昼12時からとなります。
+                    まだ予約受付期間前です。<br />
+                    予約受付開始：<span className="font-medium">{getReservationOpenTimeLabel(bd.date)}</span>
                   </div>
                 );
                 return null;

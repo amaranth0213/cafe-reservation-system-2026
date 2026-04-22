@@ -61,6 +61,15 @@ export function isReservationOpen(mondayDate: string): boolean {
   return Date.now() >= getReservationOpenTime(mondayDate).getTime();
 }
 
+// 予約受付開始日時の表示用文字列（常に4日前の木曜日12:00で表示）
+export function getReservationOpenTimeLabel(mondayDate: string): string {
+  const monday = new Date(mondayDate + 'T00:00:00+09:00');
+  const thursday = new Date(monday.getTime() - 4 * 24 * 60 * 60 * 1000);
+  const month = thursday.getMonth() + 1;
+  const day = thursday.getDate();
+  return `${month}月${day}日（木）正午12時`;
+}
+
 // お菓子の注文が可能かどうか（土曜23:59以前）
 export function isSweetsAvailable(mondayDate: string): boolean {
   return Date.now() <= getSweetsDeadline(mondayDate).getTime();
