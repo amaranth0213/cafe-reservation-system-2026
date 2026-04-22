@@ -62,7 +62,7 @@ export default async function HomePage() {
               <p>お飲み物は当日お席についてからゆっくりお選びください。</p>
             </div>
             <div className="p-5 rounded-xl bg-cream-50 border border-cream-200 text-sm text-matcha-700">
-              <strong className="font-normal">キャンセル・注文変更について：</strong>instagram のメッセージよりご連絡ください。また、当日お菓子も少しご用意しています。
+              <strong className="font-normal">キャンセル・注文変更について：</strong>instagram のDMよりご連絡ください。また、当日用のお菓子も少しご用意しています。
             </div>
           </div>
         </div>
