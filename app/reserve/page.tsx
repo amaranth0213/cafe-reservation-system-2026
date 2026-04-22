@@ -483,6 +483,31 @@ export default function ReservePage() {
               </div>
             </div>
 
+            {/* 未入力項目チェックリスト */}
+            {(() => {
+              const missing = [];
+              if (!selectedDate || !isSelectedDateBookable) missing.push('日程');
+              if (reservationType !== 'takeout' && !selectedSlotId) missing.push('時間帯');
+              if (!reservationType) missing.push('予約タイプ');
+              if (reservationType !== 'takeout' && reservationType && !selectedSeatTypeId) missing.push('席種');
+              if (!customerName.trim()) missing.push('お名前');
+              if (!customerPhone.trim()) missing.push('電話番号');
+              if (missing.length === 0) return null;
+              return (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800">
+                  <p className="font-semibold mb-2">⚠️ 以下の項目を入力してください</p>
+                  <ul className="space-y-1">
+                    {missing.map(item => (
+                      <li key={item} className="flex items-center gap-2">
+                        <span className="w-4 h-4 rounded-full border-2 border-amber-400 inline-block flex-shrink-0" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
+
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                 {error}
