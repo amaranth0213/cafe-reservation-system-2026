@@ -631,8 +631,8 @@ export default function ReservePage() {
             </div>
 
             {reservationType === 'seat_only' && (
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-800">
-                ⚠️ 席のみのご予約の場合、当日の状況によりお菓子をご用意できない場合があります。あらかじめご了承ください。
+              <div className="p-4 bg-cream-50 border border-cream-200 rounded-xl text-sm text-matcha-700">
+                席のみのご予約の場合、当日分として用意しておりますお菓子よりお選びいただくことができます。しかしながら状況によりお菓子をご用意できない場合があります。あらかじめご了承ください。
               </div>
             )}
 
