@@ -66,13 +66,10 @@ export function isSweetsAvailable(mondayDate: string): boolean {
   return Date.now() <= getSweetsDeadline(mondayDate).getTime();
 }
 
-// 予約コード生成（例: CA-00042）
-let codeCounter = 0;
-export function generateReservationCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return `CA-${code}`;
+// 予約コード生成（例: 0428-1）
+// dateStr: YYYY-MM-DD 形式、seq: その日の連番（1始まり）
+export function generateReservationCode(dateStr: string, seq: number): string {
+  const parts = dateStr.split('-');
+  const mmdd = `${parts[1]}${parts[2]}`; // MMDD
+  return `${mmdd}-${seq}`;
 }

@@ -135,13 +135,25 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // 予約コード生成
-  let reservationCode = generateReservationCode();
-  for (let i = 0; i < 5; i++) {
-    const { data: existing } = await supabase.from('reservations').select('id').eq('reservation_code', reservationCode).single();
-    if (!existing) break;
-    reservationCode = generateReservationCode();
+  // 予約コード生成（日付＋連番方式: 例 0428-1）
+  let reservationDate = new Date().toISOString().split('T')[0];
+  if (time_slot_id) {
+    const { data: tsForCode } = await supabase
+      .from('time_slots')
+      .select('business_days(date)')
+      .eq('id', time_slot_id)
+      .single();
+    const d = (tsForCode?.business_days as unknown as { date: string } | null)?.date;
+    if (d) reservationDate = d;
   }
+  const dateParts = reservationDate.split('-');
+  const mmdd = `${dateParts[1]}${dateParts[2]}`;
+  const { count: existingCount } = await supabase
+    .from('reservations')
+    .select('id', { count: 'exact', head: true })
+    .like('reservation_code', `${mmdd}-%`);
+  const seq = (existingCount ?? 0) + 1;
+  const reservationCode = generateReservationCode(reservationDate, seq);
 
   // 予約作成
   const { data: reservation, error: insertError } = await supabase
