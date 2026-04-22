@@ -57,8 +57,9 @@ export default async function HomePage() {
             ))}
           </div>
           <div className="mt-8 space-y-3">
-            <div className="p-5 rounded-xl bg-cream-50 border border-cream-200 text-sm text-matcha-700">
-              お飲み物は当日お席についてからゆっくりお選びください。
+            <div className="p-5 bg-matcha-50 border-l-4 border-matcha-400 rounded-xl text-sm text-matcha-800">
+              <p className="font-semibold mb-1">☕ お飲み物について</p>
+              <p>お飲み物は当日お席についてからゆっくりお選びください。</p>
             </div>
             <div className="p-5 rounded-xl bg-cream-50 border border-cream-200 text-sm text-matcha-700">
               <strong className="font-normal">キャンセル・注文変更について：</strong>instagram のメッセージよりご連絡ください。また、当日お菓子も少しご用意しています。
