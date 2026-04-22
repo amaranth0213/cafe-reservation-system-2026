@@ -75,7 +75,7 @@ function LookupContent() {
             value={code}
             onChange={e => setCode(e.target.value.toUpperCase())}
             onKeyDown={e => e.key === 'Enter' && handleSearch()}
-            placeholder="例：CA-00042"
+            placeholder="例：0428-1"
             className="input flex-1 font-mono tracking-wider"
           />
           <button
