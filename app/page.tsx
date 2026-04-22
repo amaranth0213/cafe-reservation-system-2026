@@ -88,7 +88,8 @@ export default async function HomePage() {
         <Link href="/reserve/lookup" className="text-matcha-500 text-xs underline underline-offset-4 hover:text-matcha-700 transition-colors">
           予約内容の確認
         </Link>
-        <p className="text-matcha-400 text-xs mt-3">© 2026 お茶と甘いもの　あまらんす</p>
+        <p className="text-matcha-500 text-xs mt-4">愛知県豊田市千石町3丁目５０９</p>
+        <p className="text-matcha-400 text-xs mt-2">© 2026 お茶と甘いもの　あまらんす</p>
       </footer>
     </main>
   );
