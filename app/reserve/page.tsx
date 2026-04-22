@@ -471,15 +471,6 @@ export default function ReservePage() {
                     required
                   />
                 </div>
-                <div>
-                  <label className="label">備考（アレルギー等）</label>
-                  <textarea
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="アレルギーや特別なご要望があればご記入ください"
-                    className="input h-24 resize-none"
-                  />
-                </div>
               </div>
             </div>
 
