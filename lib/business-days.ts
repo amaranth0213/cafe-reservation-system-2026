@@ -56,6 +56,7 @@ export function getSweetsDeadline(mondayDate: string): Date {
   return new Date(saturday.getTime() + (23 * 60 + 59) * 60 * 1000);
 }
 
+
 // 予約受付中かどうか（木曜12時以降）
 export function isReservationOpen(mondayDate: string): boolean {
   return Date.now() >= getReservationOpenTime(mondayDate).getTime();
