@@ -11,6 +11,15 @@ interface DayOption {
   is_open: boolean;
 }
 
+// 10件ずつのページに分割
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const result: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
+}
+
 export default function PrintCardsPage() {
   const [days, setDays] = useState<DayOption[]>([]);
   const [selectedDate, setSelectedDate] = useState('');
@@ -45,25 +54,83 @@ export default function PrintCardsPage() {
   };
 
   const getItems = (r: Reservation) => {
-    const items = r.reservation_items ?? [];
-    return items.filter(i => i.quantity > 0);
+    return (r.reservation_items ?? []).filter(i => i.quantity > 0);
+  };
+
+  const pages = chunkArray(reservations, 10);
+
+  const renderCard = (r: Reservation) => {
+    const items = getItems(r);
+    return (
+      <div key={r.id} className="res-card">
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <span className="card-code">{r.reservation_code}</span>
+            <span className="card-time">{getSlotTime(r)}</span>
+          </div>
+          <div className="card-name">{r.customer_name}　様</div>
+          <div className="card-seat">
+            {getSeatLabel(r)}
+            {r.party_size ? `　${r.party_size}名` : ''}
+            {r.notes ? `　備考: ${r.notes}` : ''}
+          </div>
+        </div>
+        <div>
+          <div className="card-divider" />
+          {items.length > 0 ? (
+            <>
+              <div className="card-items-title">お菓子注文</div>
+              {items.map(item => (
+                <div key={item.id} className="card-item">
+                  {(item.menus as { name: string } | undefined)?.name ?? ''}　×{item.quantity}
+                  {item.is_takeout ? '（TO）' : ''}
+                </div>
+              ))}
+            </>
+          ) : (
+            <div className="card-no-food">お菓子注文なし</div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
     <>
       <style>{`
+        /* ===== 印刷専用スタイル ===== */
         @media print {
-          .no-print { display: none !important; }
-          body { margin: 0; padding: 0; background: white; }
+          /* ブラウザの余白を完全にゼロにする */
+          @page {
+            size: A4 portrait;
+            margin: 0;
+          }
 
-          /* A-ONE 51691: A4・10面（2列×5行）91mm×55mm */
-          .print-area {
+          html, body {
+            margin: 0;
+            padding: 0;
+            background: white;
+          }
+
+          .no-print { display: none !important; }
+
+          /* 1ページ = A4サイズの固定コンテナ */
+          .print-page {
+            width: 210mm;
+            height: 297mm;
+            overflow: hidden;
+            page-break-after: always;
+            page-break-inside: avoid;
+            box-sizing: border-box;
+            /* A-ONE 51691: 上13mm・左8.5mm のパディング */
+            padding: 13mm 0 0 8.5mm;
+          }
+
+          /* 2列×5行 = 10枚固定グリッド */
+          .print-grid {
             display: grid;
             grid-template-columns: 91mm 91mm;
-            grid-auto-rows: 55mm;
-            column-gap: 0;
-            row-gap: 0;
-            margin: 13mm 8.5mm 0 8.5mm;
+            grid-template-rows: repeat(5, 55mm);
             width: 182mm;
           }
 
@@ -71,60 +138,63 @@ export default function PrintCardsPage() {
             width: 91mm;
             height: 55mm;
             box-sizing: border-box;
-            padding: 3mm 4mm;
-            border: none;
-            background: white;
-            page-break-inside: avoid;
+            padding: 3mm 4mm 2mm 4mm;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            background: white;
           }
 
-          .card-code { font-size: 16pt; font-weight: bold; letter-spacing: 0.05em; }
-          .card-time { font-size: 10pt; color: #555; }
-          .card-name { font-size: 12pt; font-weight: bold; margin-top: 1mm; }
-          .card-seat { font-size: 9pt; color: #444; margin-top: 0.5mm; }
-          .card-divider { border-top: 0.3mm solid #ccc; margin: 1.5mm 0; }
-          .card-items-title { font-size: 8pt; color: #666; }
-          .card-item { font-size: 8.5pt; color: #333; }
-          .card-no-food { font-size: 8pt; color: #999; }
+          .card-code { font-size: 15pt; font-weight: bold; letter-spacing: 0.03em; }
+          .card-time { font-size: 9pt; color: #444; }
+          .card-name { font-size: 11pt; font-weight: bold; margin-top: 0.8mm; }
+          .card-seat { font-size: 8.5pt; color: #444; margin-top: 0.5mm; }
+          .card-divider { border: none; border-top: 0.3mm solid #bbb; margin: 1.5mm 0 1mm; }
+          .card-items-title { font-size: 7.5pt; color: #666; margin-bottom: 0.5mm; }
+          .card-item { font-size: 8pt; color: #222; line-height: 1.3; }
+          .card-no-food { font-size: 7.5pt; color: #aaa; }
         }
 
+        /* ===== 画面プレビュー用スタイル ===== */
         @media screen {
-          .print-area {
+          .print-page {
+            margin-bottom: 32px;
+          }
+
+          .print-grid {
             display: grid;
-            grid-template-columns: repeat(2, 340px);
-            gap: 12px;
-            padding: 24px;
+            grid-template-columns: repeat(2, 320px);
+            gap: 10px;
+            padding: 20px;
           }
 
           .res-card {
-            width: 340px;
-            height: 205px;
+            width: 320px;
+            height: 190px;
             box-sizing: border-box;
-            padding: 12px 16px;
+            padding: 12px 14px;
             border: 1px solid #d1d5db;
             border-radius: 8px;
             background: white;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
           }
 
-          .card-code { font-size: 22px; font-weight: bold; letter-spacing: 0.05em; color: #2d5a27; }
-          .card-time { font-size: 13px; color: #6b7280; }
-          .card-name { font-size: 16px; font-weight: bold; margin-top: 4px; color: #111; }
-          .card-seat { font-size: 12px; color: #4b5563; margin-top: 2px; }
-          .card-divider { border-top: 1px solid #e5e7eb; margin: 8px 0; }
-          .card-items-title { font-size: 11px; color: #9ca3af; }
-          .card-item { font-size: 12px; color: #374151; }
-          .card-no-food { font-size: 11px; color: #d1d5db; }
+          .card-code { font-size: 20px; font-weight: bold; letter-spacing: 0.03em; color: #2d5a27; }
+          .card-time { font-size: 12px; color: #6b7280; }
+          .card-name { font-size: 14px; font-weight: bold; margin-top: 3px; color: #111; }
+          .card-seat { font-size: 11px; color: #4b5563; margin-top: 2px; }
+          .card-divider { border: none; border-top: 1px solid #e5e7eb; margin: 6px 0 4px; }
+          .card-items-title { font-size: 10px; color: #9ca3af; margin-bottom: 2px; }
+          .card-item { font-size: 11px; color: #374151; line-height: 1.4; }
+          .card-no-food { font-size: 10px; color: #d1d5db; }
         }
       `}</style>
 
-      {/* 操作パネル（印刷時非表示） */}
+      {/* 操作パネル（印刷時は非表示） */}
       <div className="no-print min-h-screen bg-gray-50">
         <div className="max-w-3xl mx-auto p-6">
           <div className="flex items-center justify-between mb-6">
@@ -153,63 +223,34 @@ export default function PrintCardsPage() {
           )}
 
           {reservations.length > 0 && (
-            <>
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-sm text-gray-600">{reservations.length}件の予約　/ A-ONE 51691（名刺サイズ10面）</p>
-                <button
-                  onClick={() => window.print()}
-                  className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
-                >
-                  🖨 印刷する
-                </button>
-              </div>
-              <p className="text-xs text-gray-400 mb-4">※ 初回は「用紙サイズ：A4・余白：なし」に設定して印刷してください</p>
-            </>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-600">
+                {reservations.length}件 ／ {pages.length}枚のA4用紙（A-ONE 51691・10面）
+              </p>
+              <button
+                onClick={() => window.print()}
+                className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+              >
+                🖨 印刷する
+              </button>
+            </div>
+          )}
+          {reservations.length > 0 && (
+            <p className="text-xs text-amber-600 mb-4">
+              ⚠️ 印刷ダイアログで「余白：なし」を選択してください
+            </p>
           )}
         </div>
       </div>
 
-      {/* 印刷カードエリア */}
-      {reservations.length > 0 && (
-        <div className="print-area">
-          {reservations.map(r => {
-            const items = getItems(r);
-            return (
-              <div key={r.id} className="res-card">
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <span className="card-code">{r.reservation_code}</span>
-                    <span className="card-time">{getSlotTime(r)}</span>
-                  </div>
-                  <div className="card-name">{r.customer_name}　様</div>
-                  <div className="card-seat">
-                    {getSeatLabel(r)}
-                    {r.party_size ? `　${r.party_size}名` : ''}
-                    {r.notes ? `　📝 ${r.notes}` : ''}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="card-divider" />
-                  {items.length > 0 ? (
-                    <>
-                      <div className="card-items-title">お菓子注文</div>
-                      {items.map(item => (
-                        <div key={item.id} className="card-item">
-                          {(item.menus as { name: string } | undefined)?.name ?? ''}　×{item.quantity}
-                          {item.is_takeout ? '（テイクアウト）' : ''}
-                        </div>
-                      ))}
-                    </>
-                  ) : (
-                    <div className="card-no-food">お菓子注文なし</div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+      {/* 印刷エリア：10件ずつページ分割 */}
+      {pages.map((pageReservations, pageIndex) => (
+        <div key={pageIndex} className="print-page">
+          <div className="print-grid">
+            {pageReservations.map(r => renderCard(r))}
+          </div>
         </div>
-      )}
+      ))}
     </>
   );
 }
