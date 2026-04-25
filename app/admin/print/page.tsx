@@ -22,6 +22,7 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
 export default function PrintCardsPage() {
   const [days, setDays] = useState<DayOption[]>([]);
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const [includeTakeout, setIncludeTakeout] = useState(false);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -31,12 +32,12 @@ export default function PrintCardsPage() {
       .then(data => setDays(Array.isArray(data) ? data : []));
   }, []);
 
-  const fetchReservations = useCallback(async (dates: string[]) => {
-    if (dates.length === 0) { setReservations([]); return; }
+  const fetchReservations = useCallback(async (dates: string[], withTakeout: boolean) => {
+    if (dates.length === 0 && !withTakeout) { setReservations([]); return; }
     setLoading(true);
 
-    // 選択された日付ごとに予約を取得してマージ
-    const results = await Promise.all(
+    // 席予約：日付ごとに取得
+    const dateResults = await Promise.all(
       dates.map(date =>
         fetch(`/api/admin/reservations?date=${date}&status=confirmed`)
           .then(r => r.json())
@@ -44,19 +45,24 @@ export default function PrintCardsPage() {
       )
     );
 
-    // 重複除去（IDで判定）
+    // テイクアウト：time_slot_id が null の確定予約を全件取得
+    const takeoutList: Reservation[] = withTakeout
+      ? await fetch('/api/admin/reservations?takeout_only=true&status=confirmed')
+          .then(r => r.json())
+          .then(data => Array.isArray(data) ? data : [])
+      : [];
+
+    // マージして重複除去
     const seen = new Set<string>();
     const merged: Reservation[] = [];
-    for (const list of results) {
-      for (const r of list) {
-        if (!seen.has(r.id)) {
-          seen.add(r.id);
-          merged.push(r);
-        }
+    for (const r of [...dateResults.flat(), ...takeoutList]) {
+      if (!seen.has(r.id)) {
+        seen.add(r.id);
+        merged.push(r);
       }
     }
 
-    // 日付・時間順に並び替え
+    // 日付・時間順（テイクアウトは末尾）
     merged.sort((a, b) => {
       const aTs = a.time_slots as { slot_time: string; business_days?: { date: string } } | null | undefined;
       const bTs = b.time_slots as { slot_time: string; business_days?: { date: string } } | null | undefined;
@@ -75,17 +81,24 @@ export default function PrintCardsPage() {
       ? selectedDates.filter(d => d !== date)
       : [...selectedDates, date];
     setSelectedDates(next);
-    fetchReservations(next);
+    fetchReservations(next, includeTakeout);
+  };
+
+  const toggleTakeout = () => {
+    const next = !includeTakeout;
+    setIncludeTakeout(next);
+    fetchReservations(selectedDates, next);
   };
 
   const selectAll = () => {
     const allDates = openDays.map(d => d.date);
     setSelectedDates(allDates);
-    fetchReservations(allDates);
+    fetchReservations(allDates, includeTakeout);
   };
 
   const clearAll = () => {
     setSelectedDates([]);
+    setIncludeTakeout(false);
     setReservations([]);
   };
 
@@ -259,6 +272,19 @@ export default function PrintCardsPage() {
                   <span className="text-sm text-gray-700">{formatDateJP(d.date)}</span>
                 </label>
               ))}
+
+              {/* テイクアウト */}
+              <div className="border-t border-gray-100 mt-2 pt-2">
+                <label className="flex items-center gap-3 cursor-pointer hover:bg-amber-50 rounded-lg px-2 py-1.5">
+                  <input
+                    type="checkbox"
+                    checked={includeTakeout}
+                    onChange={toggleTakeout}
+                    className="w-4 h-4 accent-amber-500"
+                  />
+                  <span className="text-sm text-amber-700 font-medium">テイクアウトを含める</span>
+                </label>
+              </div>
             </div>
           </div>
 

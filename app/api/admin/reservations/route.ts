@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
   const date = searchParams.get('date');
   const slotTime = searchParams.get('slot_time');
   const status = searchParams.get('status');
+  const takeoutOnly = searchParams.get('takeout_only') === 'true';
 
   const supabase = createServerClient();
 
@@ -65,6 +66,11 @@ export async function GET(request: NextRequest) {
       // 営業日が見つからない場合もテイクアウトをコードで検索
       query = query.like('reservation_code', `${mmdd}-%`);
     }
+  }
+
+  // テイクアウトのみ取得（time_slot_idがnullの予約）
+  if (takeoutOnly) {
+    query = query.is('time_slot_id', null);
   }
 
   if (slotTime) {
