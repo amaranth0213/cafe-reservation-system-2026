@@ -196,15 +196,15 @@ export default function PrintCardsPage() {
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
             background: white;
           }
 
           .card-code { font-size: 15pt; font-weight: bold; letter-spacing: 0.03em; }
           .card-time { font-size: 9pt; color: #444; }
-          .card-name { font-size: 11pt; font-weight: bold; margin-top: 0.8mm; }
-          .card-seat { font-size: 8.5pt; color: #444; margin-top: 0.5mm; }
-          .card-divider { border: none; border-top: 0.3mm solid #bbb; margin: 1.5mm 0 1mm; }
+          .card-name { font-size: 11pt; font-weight: bold; margin-top: 0.5mm; }
+          .card-seat { font-size: 8.5pt; color: #444; margin-top: 0.3mm; }
+          .card-divider { border: none; border-top: 0.3mm solid #bbb; margin: 1mm 0 0.8mm; }
           .card-items-title { font-size: 7.5pt; color: #666; margin-bottom: 0.5mm; }
           .card-item { font-size: 8pt; color: #222; line-height: 1.3; }
           .card-no-food { font-size: 7.5pt; color: #aaa; }
@@ -229,13 +229,13 @@ export default function PrintCardsPage() {
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: flex-start;
           }
           .card-code { font-size: 20px; font-weight: bold; letter-spacing: 0.03em; color: #2d5a27; }
           .card-time { font-size: 12px; color: #6b7280; }
-          .card-name { font-size: 14px; font-weight: bold; margin-top: 3px; color: #111; }
-          .card-seat { font-size: 11px; color: #4b5563; margin-top: 2px; }
-          .card-divider { border: none; border-top: 1px solid #e5e7eb; margin: 6px 0 4px; }
+          .card-name { font-size: 14px; font-weight: bold; margin-top: 2px; color: #111; }
+          .card-seat { font-size: 11px; color: #4b5563; margin-top: 1px; }
+          .card-divider { border: none; border-top: 1px solid #e5e7eb; margin: 5px 0 4px; }
           .card-items-title { font-size: 10px; color: #9ca3af; margin-bottom: 2px; }
           .card-item { font-size: 11px; color: #374151; line-height: 1.4; }
           .card-no-food { font-size: 10px; color: #d1d5db; }
