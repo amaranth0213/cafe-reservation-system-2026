@@ -119,11 +119,15 @@ export default function PrintCardsPage() {
             width: 210mm;
             height: 297mm;
             overflow: hidden;
-            page-break-after: always;
             page-break-inside: avoid;
             box-sizing: border-box;
             /* A-ONE 51691: 上13mm・左8.5mm のパディング */
             padding: 13mm 0 0 8.5mm;
+          }
+
+          /* 2枚目以降の前にだけ改ページを入れる（先頭に空白ページが生まれない） */
+          .print-page + .print-page {
+            page-break-before: always;
           }
 
           /* 2列×5行 = 10枚固定グリッド */
