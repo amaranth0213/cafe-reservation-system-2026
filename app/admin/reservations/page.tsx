@@ -199,6 +199,9 @@ export default function AdminReservationsPage() {
           <a href="/api/admin/export" className="btn-secondary text-sm py-2 px-4">
             CSV出力
           </a>
+          <a href="/admin/print" className="btn-secondary text-sm py-2 px-4">
+            🖨 カード印刷
+          </a>
         </div>
       </div>
 
