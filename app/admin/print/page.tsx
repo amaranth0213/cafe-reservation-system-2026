@@ -149,7 +149,13 @@ export default function PrintCardsPage() {
       <style>{`
         @media print {
           @page { size: A4 portrait; margin: 0; }
+
+          /* adminレイアウトのwrapperとnavを完全リセット */
           html, body { margin: 0; padding: 0; background: white; }
+          nav { display: none !important; }
+          body > div { min-height: 0 !important; height: auto !important; background: white !important; }
+          main { max-width: none !important; padding: 0 !important; margin: 0 !important; }
+
           .no-print { display: none !important; }
 
           .print-page {
