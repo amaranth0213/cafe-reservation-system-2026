@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Reservation } from '@/types';
 import { SEAT_LABELS, SLOT_TIME_LABELS } from '@/types';
 import { formatDateJP } from '@/lib/business-days';
@@ -11,7 +11,6 @@ interface DayOption {
   is_open: boolean;
 }
 
-// 10件ずつのページに分割
 function chunkArray<T>(arr: T[], size: number): T[][] {
   const result: T[][] = [];
   for (let i = 0; i < arr.length; i += size) {
@@ -22,7 +21,7 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
 
 export default function PrintCardsPage() {
   const [days, setDays] = useState<DayOption[]>([]);
-  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -32,20 +31,69 @@ export default function PrintCardsPage() {
       .then(data => setDays(Array.isArray(data) ? data : []));
   }, []);
 
-  useEffect(() => {
-    if (!selectedDate) return;
+  const fetchReservations = useCallback(async (dates: string[]) => {
+    if (dates.length === 0) { setReservations([]); return; }
     setLoading(true);
-    fetch(`/api/admin/reservations?date=${selectedDate}&status=confirmed`)
-      .then(r => r.json())
-      .then(data => {
-        setReservations(Array.isArray(data) ? data : []);
-        setLoading(false);
-      });
-  }, [selectedDate]);
+
+    // 選択された日付ごとに予約を取得してマージ
+    const results = await Promise.all(
+      dates.map(date =>
+        fetch(`/api/admin/reservations?date=${date}&status=confirmed`)
+          .then(r => r.json())
+          .then(data => Array.isArray(data) ? data : [])
+      )
+    );
+
+    // 重複除去（IDで判定）
+    const seen = new Set<string>();
+    const merged: Reservation[] = [];
+    for (const list of results) {
+      for (const r of list) {
+        if (!seen.has(r.id)) {
+          seen.add(r.id);
+          merged.push(r);
+        }
+      }
+    }
+
+    // 日付・時間順に並び替え
+    merged.sort((a, b) => {
+      const aTs = a.time_slots as { slot_time: string; business_days?: { date: string } } | null | undefined;
+      const bTs = b.time_slots as { slot_time: string; business_days?: { date: string } } | null | undefined;
+      const aKey = aTs?.business_days?.date ? `${aTs.business_days.date} ${aTs.slot_time}` : 'zzzz';
+      const bKey = bTs?.business_days?.date ? `${bTs.business_days.date} ${bTs.slot_time}` : 'zzzz';
+      if (aKey !== bKey) return aKey.localeCompare(bKey);
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    });
+
+    setReservations(merged);
+    setLoading(false);
+  }, []);
+
+  const toggleDate = (date: string) => {
+    const next = selectedDates.includes(date)
+      ? selectedDates.filter(d => d !== date)
+      : [...selectedDates, date];
+    setSelectedDates(next);
+    fetchReservations(next);
+  };
+
+  const selectAll = () => {
+    const allDates = openDays.map(d => d.date);
+    setSelectedDates(allDates);
+    fetchReservations(allDates);
+  };
+
+  const clearAll = () => {
+    setSelectedDates([]);
+    setReservations([]);
+  };
+
+  const openDays = days.filter(d => d.is_open);
 
   const getSlotTime = (r: Reservation) => {
     const ts = r.time_slots as { slot_time: string } | null | undefined;
-    return ts?.slot_time ? SLOT_TIME_LABELS[ts.slot_time as keyof typeof SLOT_TIME_LABELS] : '';
+    return ts?.slot_time ? SLOT_TIME_LABELS[ts.slot_time as keyof typeof SLOT_TIME_LABELS] : 'テイクアウト';
   };
 
   const getSeatLabel = (r: Reservation) => {
@@ -61,6 +109,7 @@ export default function PrintCardsPage() {
 
   const renderCard = (r: Reservation) => {
     const items = getItems(r);
+    const isTakeout = r.reservation_type === 'takeout';
     return (
       <div key={r.id} className="res-card">
         <div>
@@ -70,7 +119,7 @@ export default function PrintCardsPage() {
           </div>
           <div className="card-name">{r.customer_name}　様</div>
           <div className="card-seat">
-            {getSeatLabel(r)}
+            {isTakeout ? 'お持ち帰り' : getSeatLabel(r)}
             {r.party_size ? `　${r.party_size}名` : ''}
             {r.notes ? `　備考: ${r.notes}` : ''}
           </div>
@@ -98,39 +147,21 @@ export default function PrintCardsPage() {
   return (
     <>
       <style>{`
-        /* ===== 印刷専用スタイル ===== */
         @media print {
-          /* ブラウザの余白を完全にゼロにする */
-          @page {
-            size: A4 portrait;
-            margin: 0;
-          }
-
-          html, body {
-            margin: 0;
-            padding: 0;
-            background: white;
-          }
-
+          @page { size: A4 portrait; margin: 0; }
+          html, body { margin: 0; padding: 0; background: white; }
           .no-print { display: none !important; }
 
-          /* 1ページ = A4サイズの固定コンテナ */
           .print-page {
             width: 210mm;
             height: 297mm;
             overflow: hidden;
             page-break-inside: avoid;
             box-sizing: border-box;
-            /* A-ONE 51691: 上13mm・左8.5mm のパディング */
             padding: 13mm 0 0 8.5mm;
           }
+          .print-page + .print-page { page-break-before: always; }
 
-          /* 2枚目以降の前にだけ改ページを入れる（先頭に空白ページが生まれない） */
-          .print-page + .print-page {
-            page-break-before: always;
-          }
-
-          /* 2列×5行 = 10枚固定グリッド */
           .print-grid {
             display: grid;
             grid-template-columns: 91mm 91mm;
@@ -160,19 +191,14 @@ export default function PrintCardsPage() {
           .card-no-food { font-size: 7.5pt; color: #aaa; }
         }
 
-        /* ===== 画面プレビュー用スタイル ===== */
         @media screen {
-          .print-page {
-            margin-bottom: 32px;
-          }
-
+          .print-page { margin-bottom: 32px; }
           .print-grid {
             display: grid;
             grid-template-columns: repeat(2, 320px);
             gap: 10px;
             padding: 20px;
           }
-
           .res-card {
             width: 320px;
             height: 190px;
@@ -186,7 +212,6 @@ export default function PrintCardsPage() {
             flex-direction: column;
             justify-content: space-between;
           }
-
           .card-code { font-size: 20px; font-weight: bold; letter-spacing: 0.03em; color: #2d5a27; }
           .card-time { font-size: 12px; color: #6b7280; }
           .card-name { font-size: 14px; font-weight: bold; margin-top: 3px; color: #111; }
@@ -198,7 +223,7 @@ export default function PrintCardsPage() {
         }
       `}</style>
 
-      {/* 操作パネル（印刷時は非表示） */}
+      {/* 操作パネル（印刷時非表示） */}
       <div className="no-print min-h-screen bg-gray-50">
         <div className="max-w-3xl mx-auto p-6">
           <div className="flex items-center justify-between mb-6">
@@ -207,42 +232,53 @@ export default function PrintCardsPage() {
           </div>
 
           <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">印刷する営業日を選択</label>
-            <select
-              value={selectedDate}
-              onChange={e => setSelectedDate(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-green-400"
-            >
-              <option value="">日付を選んでください</option>
-              {days.filter(d => d.is_open).map(d => (
-                <option key={d.id} value={d.date}>{formatDateJP(d.date)}</option>
+            <div className="flex items-center justify-between mb-3">
+              <label className="block text-sm font-medium text-gray-700">印刷する営業日を選択（複数可）</label>
+              <div className="flex gap-2">
+                <button onClick={selectAll} className="text-xs text-green-600 hover:underline">すべて選択</button>
+                <span className="text-gray-300">|</span>
+                <button onClick={clearAll} className="text-xs text-gray-400 hover:underline">すべて解除</button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {openDays.length === 0 && <p className="text-sm text-gray-400">営業日が登録されていません</p>}
+              {openDays.map(d => (
+                <label key={d.id} className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg px-2 py-1.5">
+                  <input
+                    type="checkbox"
+                    checked={selectedDates.includes(d.date)}
+                    onChange={() => toggleDate(d.date)}
+                    className="w-4 h-4 accent-green-600"
+                  />
+                  <span className="text-sm text-gray-700">{formatDateJP(d.date)}</span>
+                </label>
               ))}
-            </select>
+            </div>
           </div>
 
           {loading && <p className="text-gray-500 text-sm">読み込み中...</p>}
 
-          {!loading && selectedDate && reservations.length === 0 && (
-            <p className="text-gray-400 text-sm">この日の確定予約はありません。</p>
+          {!loading && selectedDates.length > 0 && reservations.length === 0 && (
+            <p className="text-gray-400 text-sm">選択した日の確定予約はありません。</p>
           )}
 
           {reservations.length > 0 && (
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-gray-600">
-                {reservations.length}件 ／ {pages.length}枚のA4用紙（A-ONE 51691・10面）
+            <>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-gray-600">
+                  {reservations.length}件 ／ {pages.length}枚のA4用紙（A-ONE 51691・10面）
+                </p>
+                <button
+                  onClick={() => window.print()}
+                  className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
+                >
+                  🖨 印刷する
+                </button>
+              </div>
+              <p className="text-xs text-amber-600 mb-4">
+                ⚠️ 印刷ダイアログで「余白：なし」を選択してください
               </p>
-              <button
-                onClick={() => window.print()}
-                className="bg-green-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors"
-              >
-                🖨 印刷する
-              </button>
-            </div>
-          )}
-          {reservations.length > 0 && (
-            <p className="text-xs text-amber-600 mb-4">
-              ⚠️ 印刷ダイアログで「余白：なし」を選択してください
-            </p>
+            </>
           )}
         </div>
       </div>

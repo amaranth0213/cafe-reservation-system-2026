@@ -34,7 +34,10 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false });
 
   if (date) {
-    // 特定日付でフィルター
+    // 特定日付でフィルター（席予約 + テイクアウト両方を含む）
+    const dateParts = date.split('-');
+    const mmdd = `${dateParts[1]}${dateParts[2]}`; // 例: "0427"
+
     const supabaseInner = createServerClient();
     const { data: businessDay } = await supabaseInner
       .from('business_days')
@@ -48,10 +51,19 @@ export async function GET(request: NextRequest) {
         .select('id')
         .eq('business_day_id', businessDay.id);
 
-      const slotIds = slots?.map((s) => s.id) ?? [];
+      const slotIds = (slots ?? []).map((s: { id: string }) => s.id);
       if (slotIds.length > 0) {
-        query = query.in('time_slot_id', slotIds);
+        // 席予約（time_slot_idが一致）OR テイクアウト（reservation_codeがMMDD-で始まる）
+        query = query.or(
+          `time_slot_id.in.(${slotIds.join(',')}),reservation_code.like.${mmdd}-%`
+        );
+      } else {
+        // スロットなし（テイクアウトのみ）
+        query = query.like('reservation_code', `${mmdd}-%`);
       }
+    } else {
+      // 営業日が見つからない場合もテイクアウトをコードで検索
+      query = query.like('reservation_code', `${mmdd}-%`);
     }
   }
 
