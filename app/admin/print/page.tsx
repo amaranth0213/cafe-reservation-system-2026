@@ -164,7 +164,7 @@ export default function PrintCardsPage() {
             overflow: hidden;
             page-break-inside: avoid;
             box-sizing: border-box;
-            padding: 13mm 0 0 8.5mm;
+            padding: 13mm 0 0 14.5mm;
           }
           .print-page + .print-page { page-break-before: always; }
 
