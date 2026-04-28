@@ -54,6 +54,17 @@ export async function PATCH(
     if (body.party_size !== undefined) updateData.party_size = body.party_size;
     updateData.notes = body.notes?.trim() ?? null;
 
+    // お菓子の有無に応じて reservation_type を自動更新
+    // テイクアウトは変えない。席予約のみ seat_only ↔ seat_with_food を切り替える
+    if (body.items !== undefined && reservation.reservation_type !== 'takeout') {
+      const hasItems = body.items.some(i => i.quantity > 0);
+      if (hasItems) {
+        updateData.reservation_type = 'seat_with_food';
+      } else {
+        updateData.reservation_type = 'seat_only';
+      }
+    }
+
     const { error } = await supabase.from('reservations').update(updateData).eq('id', id);
     if (error) return NextResponse.json({ error: '更新に失敗しました' }, { status: 500 });
 
