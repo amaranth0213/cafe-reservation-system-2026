@@ -64,6 +64,7 @@ export default async function AdminDashboardPage({
     menu_id: string;
     menu_name: string;
     stock: number | null;
+    hold_count: number;
     ordered: number;
   };
   let stockRows: StockRow[] = [];
@@ -72,7 +73,7 @@ export default async function AdminDashboardPage({
     // メニュー一覧
     const { data: menus } = await supabase
       .from('menus')
-      .select('id, name, stock')
+      .select('id, name, stock, hold_count')
       .eq('is_available', true)
       .order('sort_order');
 
@@ -117,6 +118,7 @@ export default async function AdminDashboardPage({
       menu_id: m.id,
       menu_name: m.name,
       stock: m.stock as number | null,
+      hold_count: (m.hold_count as number) ?? 0,
       ordered: orderedByMenu[m.id] ?? 0,
     }));
   }
@@ -176,11 +178,13 @@ export default async function AdminDashboardPage({
                       <th className="pb-2 font-medium">メニュー</th>
                       <th className="pb-2 font-medium text-right">在庫</th>
                       <th className="pb-2 font-medium text-right">予約済み</th>
+                      <th className="pb-2 font-medium text-right">取り置き</th>
                       <th className="pb-2 font-medium text-right">当日残り</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {stockRows.map(row => {
+                      // 当日残り = 総在庫 − 予約済み（取り置き分も含む本当の残り）
                       const remaining = row.stock == null ? null : row.stock - row.ordered;
                       const isSoldOut = remaining !== null && remaining <= 0;
                       const isLow = remaining !== null && remaining > 0 && remaining <= 2;
@@ -193,6 +197,9 @@ export default async function AdminDashboardPage({
                           </td>
                           <td className="py-2 text-right text-gray-600">
                             {row.ordered > 0 ? `${row.ordered}個` : '—'}
+                          </td>
+                          <td className="py-2 text-right text-gray-400 text-xs">
+                            {row.hold_count > 0 ? `${row.hold_count}個` : '—'}
                           </td>
                           <td className="py-2 text-right font-semibold">
                             {row.stock == null ? (
@@ -211,7 +218,7 @@ export default async function AdminDashboardPage({
                   </tbody>
                 </table>
                 <p className="text-xs text-gray-400 mt-3">
-                  ※「当日残り」＝在庫 − 事前予約済み数。席のみ予約の方の当日注文分は含みません。
+                  ※「当日残り」＝総在庫 − 予約済み数（取り置き分含む）。この数が当日お出しできる最大数です。
                 </p>
               </div>
             )}

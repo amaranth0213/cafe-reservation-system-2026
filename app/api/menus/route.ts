@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const supabase = createServerClient();
   const { data: menus } = await supabase
     .from('menus')
-    .select('id, name, description, price, stock, is_takeout_available')
+    .select('id, name, description, price, stock, hold_count, is_takeout_available')
     .eq('is_available', true)
     .order('sort_order');
 
@@ -75,13 +75,19 @@ export async function GET(request: NextRequest) {
 
     const result = menus.map((menu) => {
       const ordered = orderedMap[menu.id] ?? 0;
-      const remaining = menu.stock !== null ? Math.max(0, menu.stock - ordered) : null;
+      const holdCount = menu.hold_count ?? 0;
+      // 事前予約で受け付ける上限 = 総在庫 − 取り置き分
+      const onlineLimit = menu.stock !== null ? menu.stock - holdCount : null;
+      const remaining = onlineLimit !== null ? Math.max(0, onlineLimit - ordered) : null;
       return { ...menu, remaining, ordered };
     });
 
     return NextResponse.json(result);
   }
 
-  // 日付なし：stockをそのままremainingとして返す
-  return NextResponse.json(menus.map((m) => ({ ...m, remaining: m.stock })));
+  // 日付なし：取り置き分を引いた値をremainingとして返す
+  return NextResponse.json(menus.map((m) => ({
+    ...m,
+    remaining: m.stock !== null ? Math.max(0, m.stock - (m.hold_count ?? 0)) : null,
+  })));
 }

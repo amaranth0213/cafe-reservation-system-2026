@@ -112,11 +112,13 @@ export async function POST(request: NextRequest) {
     if (menuIds.length > 0) {
       const { data: menuStocks } = await supabase
         .from('menus')
-        .select('id, name, stock')
+        .select('id, name, stock, hold_count')
         .in('id', menuIds);
 
       for (const menu of menuStocks ?? []) {
         if (menu.stock === null) continue; // 制限なし
+        // 事前予約上限 = 総在庫 − 当日取り置き
+        const onlineLimit = menu.stock - (menu.hold_count ?? 0);
         const requested = items
           .filter((i: { menu_id: string }) => i.menu_id === menu.id)
           .reduce((sum: number, i: { quantity: number }) => sum + i.quantity, 0);
@@ -139,8 +141,8 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        if (orderedCount + requested > menu.stock) {
-          const remaining = Math.max(0, menu.stock - orderedCount);
+        if (orderedCount + requested > onlineLimit) {
+          const remaining = Math.max(0, onlineLimit - orderedCount);
           return NextResponse.json(
             { error: `「${menu.name}」の残り数は${remaining}個です。数量を減らしてください。` },
             { status: 409 }

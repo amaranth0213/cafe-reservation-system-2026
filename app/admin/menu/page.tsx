@@ -27,8 +27,8 @@ export default function AdminMenuPage() {
 
     const method = isNew ? 'POST' : 'PATCH';
     const body = isNew
-      ? { name: editing.name, description: editing.description, price: editing.price ?? 0, is_available: editing.is_available ?? true, sort_order: editing.sort_order ?? 0, stock: editing.stock ?? null, is_takeout_available: editing.is_takeout_available ?? true }
-      : { id: editing.id, name: editing.name, description: editing.description, price: editing.price, is_available: editing.is_available, sort_order: editing.sort_order, stock: editing.stock ?? null, is_takeout_available: editing.is_takeout_available ?? true };
+      ? { name: editing.name, description: editing.description, price: editing.price ?? 0, is_available: editing.is_available ?? true, sort_order: editing.sort_order ?? 0, stock: editing.stock ?? null, hold_count: editing.hold_count ?? 0, is_takeout_available: editing.is_takeout_available ?? true }
+      : { id: editing.id, name: editing.name, description: editing.description, price: editing.price, is_available: editing.is_available, sort_order: editing.sort_order, stock: editing.stock ?? null, hold_count: editing.hold_count ?? 0, is_takeout_available: editing.is_takeout_available ?? true };
 
     const res = await fetch('/api/admin/menu', {
       method,
@@ -184,15 +184,31 @@ export default function AdminMenuPage() {
                 />
               </div>
               <div>
-                <label className="label">本日の在庫数（空欄＝無制限、0＝完売）</label>
+                <label className="label">総在庫数（空欄＝無制限、0＝完売）</label>
                 <input
                   type="number"
                   value={editing.stock ?? ''}
                   onChange={(e) => setEditing({ ...editing, stock: e.target.value === '' ? null : Number(e.target.value) })}
                   className="input"
                   min="0"
-                  placeholder="例: 8（空欄で無制限）"
+                  placeholder="例: 10（実際に用意する個数）"
                 />
+              </div>
+              <div>
+                <label className="label">当日取り置き数（席のみの方用・0でも可）</label>
+                <input
+                  type="number"
+                  value={editing.hold_count ?? 0}
+                  onChange={(e) => setEditing({ ...editing, hold_count: Number(e.target.value) })}
+                  className="input"
+                  min="0"
+                  placeholder="例: 2（事前予約に使わず当日に残しておく個数）"
+                />
+                {(editing.stock != null) && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    → 事前予約上限：{Math.max(0, (editing.stock ?? 0) - (editing.hold_count ?? 0))}個
+                  </p>
+                )}
               </div>
               <label className="flex items-center gap-2 text-sm cursor-pointer">
                 <input
