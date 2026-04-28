@@ -76,6 +76,20 @@ export function isSweetsAvailable(mondayDate: string): boolean {
   return Date.now() <= getSweetsDeadline(mondayDate).getTime();
 }
 
+// 次の月曜日の日付を YYYY-MM-DD で返す（今日が月曜なら今日）
+export function getNextMondayDate(): string {
+  const today = new Date();
+  // JST に合わせるためオフセット補正
+  const jst = new Date(today.getTime() + 9 * 60 * 60 * 1000);
+  const dayOfWeek = jst.getUTCDay(); // 0=日, 1=月, ..., 6=土
+  const daysToMonday = dayOfWeek === 1 ? 0 : (8 - dayOfWeek) % 7;
+  const monday = new Date(jst.getTime() + daysToMonday * 24 * 60 * 60 * 1000);
+  const y = monday.getUTCFullYear();
+  const m = String(monday.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(monday.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 // 予約コード生成（例: 0428-1）
 // dateStr: YYYY-MM-DD 形式、seq: その日の連番（1始まり）
 export function generateReservationCode(dateStr: string, seq: number): string {

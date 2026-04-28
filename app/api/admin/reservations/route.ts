@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAdminAuthenticated } from '@/lib/auth';
 import { createServerClient } from '@/lib/supabase/server';
-import { generateReservationCode } from '@/lib/business-days';
+import { generateReservationCode, getNextMondayDate } from '@/lib/business-days';
 import { getSlotAvailability, closeSlotIfFull } from '@/lib/availability';
 import type { ReservationType, OrderItem } from '@/types';
 
@@ -160,7 +160,8 @@ export async function POST(request: NextRequest) {
   }
 
   // 予約コード生成（日付＋連番方式: 例 0428-1）
-  let reservationDate = new Date().toISOString().split('T')[0];
+  // テイクアウトは次の月曜日、席予約はスロットの営業日
+  let reservationDate = getNextMondayDate();
   if (time_slot_id) {
     const { data: tsForCode } = await supabase
       .from('time_slots')
