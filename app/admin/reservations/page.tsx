@@ -124,8 +124,8 @@ export default function AdminReservationsPage() {
       quantity: i.quantity,
       is_takeout: i.is_takeout,
     })));
-    // メニュー一覧を取得
-    fetch('/api/menus').then(r => r.json()).then(setMenus).catch(() => {});
+    // メニュー一覧を取得（管理用：非表示メニューも含む全件）
+    fetch('/api/admin/menu').then(r => r.json()).then(setMenus).catch(() => {});
   };
 
   const updateEditItem = (menuId: string, menuName: string, price: number, qty: number, isTakeout: boolean) => {
@@ -463,7 +463,7 @@ export default function AdminReservationsPage() {
                 <label className="label">備考</label>
                 <input type="text" value={editNotes} onChange={e => setEditNotes(e.target.value)} className="input" placeholder="アレルギーなど" />
               </div>
-              {(editTarget.reservation_type === 'seat_with_food' || editTarget.reservation_type === 'takeout') && menus.length > 0 && (
+              {menus.length > 0 && (
                 <div>
                   <label className="label">お菓子の注文</label>
                   <div className="space-y-3 mt-2">
