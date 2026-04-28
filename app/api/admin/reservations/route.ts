@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
   const slotTime = searchParams.get('slot_time');
   const status = searchParams.get('status');
   const takeoutOnly = searchParams.get('takeout_only') === 'true';
+  const createdAfter = searchParams.get('created_after'); // YYYY-MM-DD
 
   const supabase = createServerClient();
 
@@ -71,6 +72,11 @@ export async function GET(request: NextRequest) {
   // テイクアウトのみ取得（time_slot_idがnullの予約）
   if (takeoutOnly) {
     query = query.is('time_slot_id', null);
+  }
+
+  // 作成日時の絞り込み（YYYY-MM-DD以降）
+  if (createdAfter) {
+    query = query.gte('created_at', `${createdAfter}T00:00:00+09:00`);
   }
 
   if (slotTime) {

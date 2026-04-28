@@ -45,9 +45,12 @@ export default function PrintCardsPage() {
       )
     );
 
-    // テイクアウト：time_slot_id が null の確定予約を全件取得
+    // テイクアウト：直近8日以内の確定予約のみ取得（今週分のみ）
+    const since = new Date();
+    since.setDate(since.getDate() - 8);
+    const sinceStr = since.toISOString().split('T')[0];
     const takeoutList: Reservation[] = withTakeout
-      ? await fetch('/api/admin/reservations?takeout_only=true&status=confirmed')
+      ? await fetch(`/api/admin/reservations?takeout_only=true&status=confirmed&created_after=${sinceStr}`)
           .then(r => r.json())
           .then(data => Array.isArray(data) ? data : [])
       : [];

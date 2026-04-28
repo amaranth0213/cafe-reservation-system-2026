@@ -28,8 +28,8 @@ export default function AdminLoginPage() {
         return;
       }
 
-      router.push('/admin');
-      router.refresh();
+      // フルリロードでCookieを確実に反映させる
+      window.location.href = '/admin';
     } catch {
       setError('通信エラーが発生しました');
       setLoading(false);
