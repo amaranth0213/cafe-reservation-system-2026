@@ -70,16 +70,25 @@ export async function PATCH(
 
     // お菓子注文の更新（既存を削除して再登録）
     if (body.items !== undefined) {
-      await supabase.from('reservation_items').delete().eq('reservation_id', id);
+      const { error: deleteError } = await supabase
+        .from('reservation_items').delete().eq('reservation_id', id);
+      if (deleteError) {
+        return NextResponse.json({ error: `削除エラー: ${deleteError.message}` }, { status: 500 });
+      }
+
       const itemsToInsert = body.items.filter(i => i.quantity > 0).map(i => ({
         reservation_id: id,
         menu_id: i.menu_id,
-        quantity: i.quantity,
-        unit_price: i.unit_price,
-        is_takeout: i.is_takeout,
+        quantity: Number(i.quantity),
+        unit_price: Number(i.unit_price),
+        is_takeout: Boolean(i.is_takeout),
       }));
       if (itemsToInsert.length > 0) {
-        await supabase.from('reservation_items').insert(itemsToInsert);
+        const { error: insertError } = await supabase
+          .from('reservation_items').insert(itemsToInsert);
+        if (insertError) {
+          return NextResponse.json({ error: `お菓子保存エラー: ${insertError.message}` }, { status: 500 });
+        }
       }
     }
 
