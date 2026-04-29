@@ -345,8 +345,78 @@ export default function AdminReservationsPage() {
         );
       })()}
 
-      {/* テーブル */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      {/* スマホ：カード形式 */}
+      <div className="md:hidden space-y-3">
+        {loading ? (
+          <div className="p-8 text-center text-gray-500">読み込み中...</div>
+        ) : reservations.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">予約がありません</div>
+        ) : reservations.map((r) => {
+          const ts = r.time_slots as { slot_time: string; business_days?: { date: string } } | undefined;
+          const items = r.reservation_items ?? [];
+          const isCancelled = r.status === 'cancelled';
+          return (
+            <div key={r.id} className={`bg-white rounded-xl border shadow-sm p-4 space-y-2 ${isCancelled ? 'opacity-50' : ''}`}>
+              {/* ヘッダー行 */}
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-bold text-matcha-700 text-base">{r.reservation_code}</span>
+                {isCancelled
+                  ? <span className="badge-cancelled">キャンセル</span>
+                  : <span className="badge-available">確定</span>}
+              </div>
+              {/* 名前・日時 */}
+              <div className="text-sm font-semibold text-gray-800">{r.customer_name}　様</div>
+              <div className="text-sm text-gray-500">
+                {ts?.business_days?.date ? `${ts.business_days.date} ${ts.slot_time}` : 'お持ち帰り'}
+              </div>
+              {/* タイプ・席 */}
+              <div className="flex flex-wrap gap-2 text-xs">
+                <span className="px-2 py-0.5 bg-matcha-50 text-matcha-700 rounded">
+                  {RESERVATION_TYPE_LABELS[r.reservation_type]}
+                </span>
+                {r.seat_types && (
+                  <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded">
+                    {SEAT_LABELS[r.seat_types.category]}・{r.party_size}名
+                  </span>
+                )}
+              </div>
+              {/* お菓子 */}
+              {items.length > 0 && (
+                <div className="text-xs text-gray-600 bg-amber-50 rounded-lg px-3 py-2 space-y-0.5">
+                  {items.map(item => (
+                    <div key={item.id}>
+                      {item.menus?.name} ×{item.quantity}
+                      {item.is_takeout && <span className="ml-1 text-amber-600">（持帰）</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {/* 電話番号 */}
+              <div className="text-sm text-gray-500">{r.customer_phone}</div>
+              {/* 操作ボタン */}
+              {!isCancelled && (
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={() => openEdit(r)}
+                    className="flex-1 py-2 text-sm font-medium bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition"
+                  >
+                    編集
+                  </button>
+                  <button
+                    onClick={() => setCancelTarget(r)}
+                    className="flex-1 py-2 text-sm font-medium bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition"
+                  >
+                    キャンセル
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* PC：テーブル形式 */}
+      <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-gray-500">読み込み中...</div>
         ) : reservations.length === 0 ? (
@@ -412,18 +482,8 @@ export default function AdminReservationsPage() {
                       <td className="px-4 py-3">
                         {r.status === 'confirmed' && (
                           <div className="flex gap-2">
-                          <button
-                            onClick={() => openEdit(r)}
-                            className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                          >
-                            編集
-                          </button>
-                          <button
-                            onClick={() => setCancelTarget(r)}
-                            className="text-xs text-red-600 hover:text-red-800 font-medium"
-                          >
-                            キャンセル
-                          </button>
+                            <button onClick={() => openEdit(r)} className="text-xs text-blue-600 hover:text-blue-800 font-medium">編集</button>
+                            <button onClick={() => setCancelTarget(r)} className="text-xs text-red-600 hover:text-red-800 font-medium">キャンセル</button>
                           </div>
                         )}
                       </td>
