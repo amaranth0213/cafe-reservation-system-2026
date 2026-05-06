@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { getSlotAvailability, closeSlotIfFull } from '@/lib/availability';
 import { generateReservationCode, isSweetsAvailable, getNextMondayDate } from '@/lib/business-days';
+import { notifyNewReservation } from '@/lib/notify';
 import type { ReservationType, OrderItem } from '@/types';
 
 interface CreateReservationBody {
@@ -222,6 +223,52 @@ export async function POST(request: NextRequest) {
   if (time_slot_id) {
     await closeSlotIfFull(time_slot_id);
   }
+
+  // 管理者へメール通知（日時・席ラベルを取得）
+  let dateLabel = 'お持ち帰り';
+  let seatLabel: string | undefined;
+
+  if (time_slot_id) {
+    const { data: tsNotify } = await supabase
+      .from('time_slots')
+      .select('slot_time, business_days(date)')
+      .eq('id', time_slot_id)
+      .single();
+    const d = (tsNotify?.business_days as unknown as { date: string } | null)?.date;
+    if (d) dateLabel = `${d} ${tsNotify?.slot_time}`;
+  }
+
+  if (seat_type_id && party_size) {
+    const seatMap: Record<string, string> = { single: '1人席', double: '2人席', quad: '4人席' };
+    const { data: stNotify } = await supabase
+      .from('seat_types').select('category').eq('id', seat_type_id).single();
+    if (stNotify) seatLabel = `${seatMap[stNotify.category] ?? stNotify.category}・${party_size}名`;
+  }
+
+  const filteredItems = (items ?? []).filter(i => i.quantity > 0);
+  let menuNameMap: Record<string, string> = {};
+  if (filteredItems.length > 0) {
+    const menuIds = filteredItems.map(i => i.menu_id);
+    const { data: menuNames } = await supabase
+      .from('menus').select('id, name').in('id', menuIds);
+    menuNameMap = Object.fromEntries((menuNames ?? []).map(m => [m.id, m.name]));
+  }
+  const notifyItems = filteredItems.map(i => ({
+    name: menuNameMap[i.menu_id] ?? i.menu_id,
+    quantity: i.quantity,
+    is_takeout: i.is_takeout,
+  }));
+
+  await notifyNewReservation({
+    reservation_code: reservation.reservation_code,
+    customer_name: customer_name.trim(),
+    customer_phone: customer_phone.trim(),
+    reservation_type,
+    date_label: dateLabel,
+    seat_label: seatLabel,
+    notes: notes?.trim(),
+    items: notifyItems,
+  });
 
   return NextResponse.json(
     { reservation_code: reservation.reservation_code, id: reservation.id },
