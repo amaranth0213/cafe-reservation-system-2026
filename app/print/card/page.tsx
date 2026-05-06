@@ -4,37 +4,43 @@ const RESERVE_URL = 'https://cafe-reservation-system-2026.vercel.app/reserve';
 const QR_URL = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(RESERVE_URL)}&margin=0&color=000000&bgcolor=ffffff`;
 
 function TeaRoomSvg() {
+  const c = '#5c3d2e';
   return (
-    <svg width="36" height="44" viewBox="0 0 36 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* 障子窓の外枠 */}
-      <rect x="1" y="1" width="26" height="38" rx="1" stroke="#5c3d2e" strokeWidth="1.4"/>
-      {/* 縦の桟（3本） */}
-      <line x1="9.5" y1="1" x2="9.5" y2="39" stroke="#5c3d2e" strokeWidth="0.8"/>
-      <line x1="18" y1="1" x2="18" y2="39" stroke="#5c3d2e" strokeWidth="0.8"/>
-      {/* 横の桟（4本） */}
-      <line x1="1" y1="9" x2="27" y2="9" stroke="#5c3d2e" strokeWidth="0.8"/>
-      <line x1="1" y1="17" x2="27" y2="17" stroke="#5c3d2e" strokeWidth="0.8"/>
-      <line x1="1" y1="25" x2="27" y2="25" stroke="#5c3d2e" strokeWidth="0.8"/>
-      <line x1="1" y1="33" x2="27" y2="33" stroke="#5c3d2e" strokeWidth="0.8"/>
-      {/* 枝（左上から伸びる） */}
-      <path d="M0 5 Q5 2 10 6 Q14 9 9 11" stroke="#5c3d2e" strokeWidth="1" fill="none"/>
-      <path d="M10 6 Q13 3 15 5" stroke="#5c3d2e" strokeWidth="0.7" fill="none"/>
+    <svg width="52" height="64" viewBox="0 0 52 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* 障子窓 外枠 */}
+      <rect x="1" y="1" width="36" height="56" stroke={c} strokeWidth="1.4" rx="0.5"/>
+      {/* 縦桟 2本（3等分） */}
+      <line x1="13" y1="1" x2="13" y2="57" stroke={c} strokeWidth="0.9"/>
+      <line x1="25" y1="1" x2="25" y2="57" stroke={c} strokeWidth="0.9"/>
+      {/* 横桟 1本（下寄り） */}
+      <line x1="1" y1="42" x2="37" y2="42" stroke={c} strokeWidth="0.9"/>
+
+      {/* 枝：左上から斜め右下へ */}
+      <path d="M1 10 Q7 6 14 14 Q18 19 13 24" stroke={c} strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+      {/* 小枝 */}
+      <path d="M10 11 Q14 7 17 9" stroke={c} strokeWidth="0.8" fill="none" strokeLinecap="round"/>
       {/* 葉っぱ */}
-      <ellipse cx="3" cy="4" rx="2" ry="1.2" transform="rotate(-20 3 4)" fill="#5c3d2e" opacity="0.7"/>
-      <ellipse cx="9" cy="2.5" rx="2" ry="1.2" transform="rotate(10 9 2.5)" fill="#5c3d2e" opacity="0.7"/>
-      <ellipse cx="15" cy="4.5" rx="1.5" ry="1" transform="rotate(30 15 4.5)" fill="#5c3d2e" opacity="0.7"/>
-      {/* 茶碗（右下） */}
-      <path d="M20 34 Q19 38 24 38 Q29 38 28 34 Z" stroke="#5c3d2e" strokeWidth="1" fill="none"/>
-      <line x1="20" y1="38" x2="28" y2="38" stroke="#5c3d2e" strokeWidth="0.8"/>
-      <line x1="21.5" y1="38" x2="21.5" y2="40" stroke="#5c3d2e" strokeWidth="0.8"/>
-      <line x1="26.5" y1="38" x2="26.5" y2="40" stroke="#5c3d2e" strokeWidth="0.8"/>
-      <line x1="21.5" y1="40" x2="26.5" y2="40" stroke="#5c3d2e" strokeWidth="0.8"/>
-      {/* 茶筅 */}
-      <line x1="31" y1="28" x2="31" y2="40" stroke="#5c3d2e" strokeWidth="1"/>
-      <path d="M28 32 Q31 30 34 32" stroke="#5c3d2e" strokeWidth="0.8" fill="none"/>
-      <line x1="29" y1="33" x2="29" y2="38" stroke="#5c3d2e" strokeWidth="0.6"/>
-      <line x1="31" y1="32" x2="31" y2="38" stroke="#5c3d2e" strokeWidth="0.6"/>
-      <line x1="33" y1="33" x2="33" y2="38" stroke="#5c3d2e" strokeWidth="0.6"/>
+      <path d="M1 8 Q4 5 6 8 Q4 10 1 8Z" fill={c}/>
+      <path d="M11 7 Q14 4 16 7 Q14 9 11 7Z" fill={c}/>
+      <path d="M17 8 Q20 6 21 9 Q19 10 17 8Z" fill={c}/>
+
+      {/* 茶碗：下部左パネル中央 */}
+      <path d="M5 50 Q4 54 9 54 Q14 54 13 50Z" stroke={c} strokeWidth="1" fill="none" strokeLinecap="round"/>
+      <line x1="5" y1="54" x2="13" y2="54" stroke={c} strokeWidth="0.9"/>
+      <line x1="7" y1="54" x2="7" y2="56" stroke={c} strokeWidth="0.9"/>
+      <line x1="11" y1="54" x2="11" y2="56" stroke={c} strokeWidth="0.9"/>
+      <line x1="7" y1="56" x2="11" y2="56" stroke={c} strokeWidth="0.9"/>
+
+      {/* 茶筅：下部右パネル */}
+      <line x1="31" y1="43" x2="31" y2="57" stroke={c} strokeWidth="1.2" strokeLinecap="round"/>
+      {/* 茶筅の結び目 */}
+      <ellipse cx="31" cy="47" rx="3.5" ry="1.5" stroke={c} strokeWidth="0.8" fill="none"/>
+      {/* 穂 */}
+      <line x1="27.5" y1="47" x2="26" y2="56" stroke={c} strokeWidth="0.7" strokeLinecap="round"/>
+      <line x1="29" y1="48" x2="28" y2="57" stroke={c} strokeWidth="0.7" strokeLinecap="round"/>
+      <line x1="31" y1="48" x2="31" y2="57" stroke={c} strokeWidth="0.7" strokeLinecap="round"/>
+      <line x1="33" y1="48" x2="34" y2="57" stroke={c} strokeWidth="0.7" strokeLinecap="round"/>
+      <line x1="34.5" y1="47" x2="36" y2="56" stroke={c} strokeWidth="0.7" strokeLinecap="round"/>
     </svg>
   );
 }
