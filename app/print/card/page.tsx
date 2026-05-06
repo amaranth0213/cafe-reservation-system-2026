@@ -74,7 +74,9 @@ export default function PrintCardPage() {
               position: 'relative',
             }}
           >
-            {/* 縦デザインを90度回転して横枠に収める */}
+            {/* 縦画像(55×91mm)を90度回転して横枠(91×55mm)の中央に配置 */}
+            {/* top: -18mm = 27.5mm(横枠中心) - 45.5mm(縦画像の半分) */}
+            {/* left: 18mm = 45.5mm(横枠中心) - 27.5mm(縦画像の半幅) */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/card.png"
@@ -83,9 +85,10 @@ export default function PrintCardPage() {
                 width: '55mm',
                 height: '91mm',
                 position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%) rotate(90deg)',
+                top: '-18mm',
+                left: '18mm',
+                transform: 'rotate(90deg)',
+                transformOrigin: 'center center',
                 objectFit: 'fill',
               }}
             />
