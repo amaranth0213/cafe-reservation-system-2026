@@ -23,7 +23,7 @@ export default function PrintCardPage() {
         @media print {
           @page {
             size: A4 portrait;
-            margin: 23mm 14mm 11mm 14mm;
+            margin: 0;
           }
           .no-print {
             display: none !important;
@@ -36,15 +36,18 @@ export default function PrintCardPage() {
         }
       `}</style>
 
-      {/* 印刷ボタン */}
+      {/* 印刷ボタン（印刷時非表示） */}
       <div className="no-print" style={{
         padding: '16px',
         textAlign: 'center',
         background: '#f8f6f0',
         borderBottom: '1px solid #e0d8cc',
       }}>
-        <p style={{ color: '#5c3d2e', marginBottom: '8px', fontSize: '14px' }}>
+        <p style={{ color: '#5c3d2e', marginBottom: '4px', fontSize: '14px' }}>
           A-ONE 51835 用 予約案内カード（10枚 / A4）
+        </p>
+        <p style={{ color: '#888', marginBottom: '10px', fontSize: '12px' }}>
+          ※ 印刷時は余白「なし」を選択してください
         </p>
         <button
           onClick={() => window.print()}
@@ -63,18 +66,26 @@ export default function PrintCardPage() {
         </button>
       </div>
 
-      {/* カードシート：2列 × 5行 = 10枚（横向き91×55mm） */}
+      {/* A4サイズ全体を包むラッパー。余白「なし」前提でpaddingで位置調整 */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 91mm)',
-        gridTemplateRows: 'repeat(5, 55mm)',
-        width: '182mm',
-        margin: '0 auto',
+        width: '210mm',
+        height: '297mm',
+        paddingTop: '13mm',
+        paddingLeft: '14mm',
+        boxSizing: 'border-box',
         background: 'white',
       }}>
-        {Array.from({ length: 10 }, (_, i) => (
-          <Card key={i} />
-        ))}
+        {/* カードグリッド：2列 × 5行 = 10枚 */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 91mm)',
+          gridTemplateRows: 'repeat(5, 55mm)',
+          width: '182mm',
+        }}>
+          {Array.from({ length: 10 }, (_, i) => (
+            <Card key={i} />
+          ))}
+        </div>
       </div>
     </>
   );
