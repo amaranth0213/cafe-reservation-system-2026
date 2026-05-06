@@ -5,24 +5,36 @@ const QR_URL = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${
 
 function TeaRoomSvg() {
   return (
-    <svg width="28" height="36" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* 窓枠 */}
-      <rect x="2" y="1" width="24" height="30" rx="1" stroke="#5c3d2e" strokeWidth="1.2"/>
-      {/* 縦桟 */}
-      <line x1="14" y1="1" x2="14" y2="31" stroke="#5c3d2e" strokeWidth="1"/>
-      {/* 横桟 */}
-      <line x1="2" y1="10" x2="26" y2="10" stroke="#5c3d2e" strokeWidth="1"/>
-      <line x1="2" y1="19" x2="26" y2="19" stroke="#5c3d2e" strokeWidth="1"/>
-      {/* 枝 */}
-      <path d="M4 6 Q8 3 10 5 Q12 7 8 8" stroke="#5c3d2e" strokeWidth="0.8" fill="none"/>
-      <circle cx="5" cy="5" r="1" fill="#5c3d2e"/>
-      <circle cx="10" cy="4" r="1" fill="#5c3d2e"/>
-      {/* 茶碗 */}
-      <path d="M16 26 Q16 29 20 29 Q24 29 24 26 L23 23 L17 23 Z" stroke="#5c3d2e" strokeWidth="0.8" fill="none"/>
-      <line x1="18" y1="29" x2="22" y2="29" stroke="#5c3d2e" strokeWidth="0.8"/>
+    <svg width="36" height="44" viewBox="0 0 36 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* 障子窓の外枠 */}
+      <rect x="1" y="1" width="26" height="38" rx="1" stroke="#5c3d2e" strokeWidth="1.4"/>
+      {/* 縦の桟（3本） */}
+      <line x1="9.5" y1="1" x2="9.5" y2="39" stroke="#5c3d2e" strokeWidth="0.8"/>
+      <line x1="18" y1="1" x2="18" y2="39" stroke="#5c3d2e" strokeWidth="0.8"/>
+      {/* 横の桟（4本） */}
+      <line x1="1" y1="9" x2="27" y2="9" stroke="#5c3d2e" strokeWidth="0.8"/>
+      <line x1="1" y1="17" x2="27" y2="17" stroke="#5c3d2e" strokeWidth="0.8"/>
+      <line x1="1" y1="25" x2="27" y2="25" stroke="#5c3d2e" strokeWidth="0.8"/>
+      <line x1="1" y1="33" x2="27" y2="33" stroke="#5c3d2e" strokeWidth="0.8"/>
+      {/* 枝（左上から伸びる） */}
+      <path d="M0 5 Q5 2 10 6 Q14 9 9 11" stroke="#5c3d2e" strokeWidth="1" fill="none"/>
+      <path d="M10 6 Q13 3 15 5" stroke="#5c3d2e" strokeWidth="0.7" fill="none"/>
+      {/* 葉っぱ */}
+      <ellipse cx="3" cy="4" rx="2" ry="1.2" transform="rotate(-20 3 4)" fill="#5c3d2e" opacity="0.7"/>
+      <ellipse cx="9" cy="2.5" rx="2" ry="1.2" transform="rotate(10 9 2.5)" fill="#5c3d2e" opacity="0.7"/>
+      <ellipse cx="15" cy="4.5" rx="1.5" ry="1" transform="rotate(30 15 4.5)" fill="#5c3d2e" opacity="0.7"/>
+      {/* 茶碗（右下） */}
+      <path d="M20 34 Q19 38 24 38 Q29 38 28 34 Z" stroke="#5c3d2e" strokeWidth="1" fill="none"/>
+      <line x1="20" y1="38" x2="28" y2="38" stroke="#5c3d2e" strokeWidth="0.8"/>
+      <line x1="21.5" y1="38" x2="21.5" y2="40" stroke="#5c3d2e" strokeWidth="0.8"/>
+      <line x1="26.5" y1="38" x2="26.5" y2="40" stroke="#5c3d2e" strokeWidth="0.8"/>
+      <line x1="21.5" y1="40" x2="26.5" y2="40" stroke="#5c3d2e" strokeWidth="0.8"/>
       {/* 茶筅 */}
-      <line x1="21" y1="22" x2="21" y2="18" stroke="#5c3d2e" strokeWidth="0.8"/>
-      <path d="M19 18 Q21 16 23 18" stroke="#5c3d2e" strokeWidth="0.7" fill="none"/>
+      <line x1="31" y1="28" x2="31" y2="40" stroke="#5c3d2e" strokeWidth="1"/>
+      <path d="M28 32 Q31 30 34 32" stroke="#5c3d2e" strokeWidth="0.8" fill="none"/>
+      <line x1="29" y1="33" x2="29" y2="38" stroke="#5c3d2e" strokeWidth="0.6"/>
+      <line x1="31" y1="32" x2="31" y2="38" stroke="#5c3d2e" strokeWidth="0.6"/>
+      <line x1="33" y1="33" x2="33" y2="38" stroke="#5c3d2e" strokeWidth="0.6"/>
     </svg>
   );
 }
