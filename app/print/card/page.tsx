@@ -23,7 +23,7 @@ export default function PrintCardPage() {
         @media print {
           @page {
             size: A4 portrait;
-            margin: 21mm 14mm 11mm 14mm;
+            margin: 23mm 14mm 11mm 14mm;
           }
           .no-print {
             display: none !important;
