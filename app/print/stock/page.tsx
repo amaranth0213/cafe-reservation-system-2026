@@ -6,7 +6,7 @@ import PrintButton from './PrintButton';
 async function getStockData() {
   const supabase = createServerClient();
 
-  // 今日の日付
+  // 今日の日付（JST）
   const today = new Date().toLocaleDateString('ja-JP', {
     timeZone: 'Asia/Tokyo',
     year: 'numeric',
@@ -14,11 +14,14 @@ async function getStockData() {
     day: '2-digit',
   }).replace(/\//g, '-');
 
-  // 今日の営業日を取得
+  // 直近の営業日を取得（今日以降で最も近い open な日）
   const { data: businessDay } = await supabase
     .from('business_days')
     .select('id, date')
-    .eq('date', today)
+    .eq('is_open', true)
+    .gte('date', today)
+    .order('date', { ascending: true })
+    .limit(1)
     .maybeSingle();
 
   // 表示中かつ在庫あるメニューを全取得
@@ -30,7 +33,7 @@ async function getStockData() {
     .gt('stock', 0)
     .order('name');
 
-  if (!menus?.length) return { menus: [], orderedMap: {}, today };
+  if (!menus?.length) return { menus: [], orderedMap: {}, displayDate: businessDay?.date ?? today };
 
   // 今日のオンライン注文済み数を集計
   const orderedMap: Record<string, number> = {};
@@ -65,15 +68,15 @@ async function getStockData() {
     }
   }
 
-  return { menus, orderedMap, today };
+  return { menus, orderedMap, displayDate: businessDay?.date ?? today };
 }
 
 export default async function PrintStockPage() {
-  const { menus, orderedMap, today } = await getStockData();
+  const { menus, orderedMap, displayDate } = await getStockData();
 
   // 日付を日本語表示に変換（正午JSTで生成してUTC日付ズレを防ぐ）
-  const [y, mo, d] = today.split('-').map(Number);
-  const weekdayStr = new Date(`${today}T12:00:00+09:00`).toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo', weekday: 'narrow' });
+  const [y, mo, d] = displayDate.split('-').map(Number);
+  const weekdayStr = new Date(`${displayDate}T12:00:00+09:00`).toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo', weekday: 'narrow' });
   const dateLabel = `${y}年${mo}月${d}日（${weekdayStr}）`;
 
   return (
