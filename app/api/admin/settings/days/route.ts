@@ -18,7 +18,6 @@ export async function GET() {
     `)
     .gte('date', today)
     .order('date')
-    .order('slot_time', { referencedTable: 'time_slots' })
     .limit(16);
 
   return NextResponse.json(data ?? []);

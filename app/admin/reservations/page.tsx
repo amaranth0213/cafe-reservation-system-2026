@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import type { Reservation, SeatCategory } from '@/types';
-import { RESERVATION_TYPE_LABELS, SEAT_LABELS, SLOT_TIME_LABELS, SEAT_ARRIVAL_OFFSET, calcArrivalTime } from '@/types';
+import { useState, useEffect, useCallback } from 'react';
+import type { Reservation } from '@/types';
+import { RESERVATION_TYPE_LABELS, SEAT_LABELS, SLOT_TIME_LABELS } from '@/types';
 import { formatDateJP } from '@/lib/business-days';
 
 interface SlotOption { id: string; slot_time: string; }
@@ -41,7 +41,7 @@ export default function AdminReservationsPage() {
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newNotes, setNewNotes] = useState('');
-  const [slotAvailMap, setSlotAvailMap] = useState<Record<string, SeatOption[]>>({});
+  const [seatOptions, setSeatOptions] = useState<SeatOption[]>([]);
   const [creating, setCreating] = useState(false);
 
   // 管理者用：全営業日を取得（木曜制限なし）
@@ -53,39 +53,15 @@ export default function AdminReservationsPage() {
 
   useEffect(() => { if (showNewForm) fetchDays(); }, [showNewForm, fetchDays]);
 
-  // 日程選択時に全スロットの空席情報をまとめて取得
+  // 日付・スロット選択時に空席情報を取得
   useEffect(() => {
-    if (!newDate) { setSlotAvailMap({}); return; }
-    const dateSlots = days.find(d => d.date === newDate)?.time_slots ?? [];
-    if (dateSlots.length === 0) return;
-    Promise.all(
-      dateSlots.map(slot =>
-        fetch(`/api/availability?slot_id=${slot.id}`)
-          .then(r => r.json())
-          .then(data => [slot.id, data.seats ?? []] as [string, SeatOption[]])
-          .catch(() => [slot.id, []] as [string, SeatOption[]])
-      )
-    ).then(entries => setSlotAvailMap(Object.fromEntries(entries)));
-  }, [newDate, days]);
-
-  // 選択日で利用可能な席種（いずれかのスロットで残席あり）
-  const dateSeatTypes = useMemo(() => {
-    const seen = new Map<string, SeatOption>();
-    Object.values(slotAvailMap).forEach(seats =>
-      seats.forEach(s => { if (!seen.has(s.seat_type_id)) seen.set(s.seat_type_id, s); })
-    );
-    return Array.from(seen.values());
-  }, [slotAvailMap]);
-
-  // 選択した席種で残席があるスロットのみ表示
-  const filteredSlots = useMemo(() => {
-    const allSlots = days.find(d => d.date === newDate)?.time_slots ?? [];
-    if (!newSeatTypeId) return allSlots;
-    return allSlots.filter(slot => {
-      const seat = (slotAvailMap[slot.id] ?? []).find(s => s.seat_type_id === newSeatTypeId);
-      return seat && seat.remaining > 0;
-    });
-  }, [newDate, newSeatTypeId, days, slotAvailMap]);
+    if (!newSlotId) { setSeatOptions([]); return; }
+    fetch(`/api/availability?slot_id=${newSlotId}`)
+      .then(r => r.json())
+      .then(data => {
+        setSeatOptions(data.seats ?? []);
+      }).catch(() => {});
+  }, [newSlotId]);
 
   const handleCreateReservation = async () => {
     if (!newName.trim() || !newPhone.trim()) return;
@@ -248,27 +224,30 @@ export default function AdminReservationsPage() {
                 <>
                   <div>
                     <label className="label">日程</label>
-                    <select value={newDate} onChange={e => { setNewDate(e.target.value); setNewPartySize(1); setNewSeatTypeId(''); setNewSlotId(''); }} className="input">
+                    <select value={newDate} onChange={e => { setNewDate(e.target.value); setNewSlotId(''); setNewSeatTypeId(''); }} className="input">
                       <option value="">選択してください</option>
                       {days.map(d => <option key={d.id} value={d.date}>{formatDateJP(d.date)}</option>)}
                     </select>
                   </div>
                   {newDate && (
                     <div>
-                      <label className="label">人数</label>
-                      <select value={newPartySize} onChange={e => { setNewPartySize(Number(e.target.value)); setNewSeatTypeId(''); setNewSlotId(''); }} className="input">
-                        {[1,2,3,4].map(n => <option key={n} value={n}>{n}名</option>)}
+                      <label className="label">時間帯</label>
+                      <select value={newSlotId} onChange={e => { setNewSlotId(e.target.value); setNewSeatTypeId(''); }} className="input">
+                        <option value="">選択してください</option>
+                        {days.find(d => d.date === newDate)?.time_slots.map(s => (
+                          <option key={s.id} value={s.id}>{SLOT_TIME_LABELS[s.slot_time as keyof typeof SLOT_TIME_LABELS] ?? s.slot_time}</option>
+                        ))}
                       </select>
                     </div>
                   )}
-                  {newDate && dateSeatTypes.filter(s => s.capacity >= newPartySize).length > 0 && (
+                  {newSlotId && seatOptions.length > 0 && (
                     <div>
                       <label className="label">席種</label>
-                      <select value={newSeatTypeId} onChange={e => { setNewSeatTypeId(e.target.value); setNewSlotId(''); }} className="input">
+                      <select value={newSeatTypeId} onChange={e => { setNewSeatTypeId(e.target.value); setNewPartySize(1); }} className="input">
                         <option value="">選択してください</option>
-                        {dateSeatTypes.filter(s => s.capacity >= newPartySize).map(s => (
-                          <option key={s.seat_type_id} value={s.seat_type_id}>
-                            {SEAT_LABELS[s.category as keyof typeof SEAT_LABELS]}
+                        {seatOptions.map(s => (
+                          <option key={s.seat_type_id} value={s.seat_type_id} disabled={s.remaining === 0}>
+                            {SEAT_LABELS[s.category as keyof typeof SEAT_LABELS]}（残{s.remaining}卓）
                           </option>
                         ))}
                       </select>
@@ -276,32 +255,12 @@ export default function AdminReservationsPage() {
                   )}
                   {newSeatTypeId && (
                     <div>
-                      <label className="label">時間帯</label>
-                      <select value={newSlotId} onChange={e => setNewSlotId(e.target.value)} className="input">
-                        <option value="">選択してください</option>
-                        {filteredSlots.map(s => {
-                          const remaining = (slotAvailMap[s.id] ?? []).find(seat => seat.seat_type_id === newSeatTypeId)?.remaining ?? 0;
-                          return (
-                            <option key={s.id} value={s.id}>
-                              {SLOT_TIME_LABELS[s.slot_time as keyof typeof SLOT_TIME_LABELS] ?? s.slot_time}（残{remaining}卓）
-                            </option>
-                          );
-                        })}
+                      <label className="label">人数</label>
+                      <select value={newPartySize} onChange={e => setNewPartySize(Number(e.target.value))} className="input">
+                        {[1,2,3,4].map(n => <option key={n} value={n}>{n}名</option>)}
                       </select>
                     </div>
                   )}
-                  {newSeatTypeId && newSlotId && (() => {
-                    const selectedSlot = days.find(d => d.date === newDate)?.time_slots.find(s => s.id === newSlotId);
-                    const selectedSeat = dateSeatTypes.find(s => s.seat_type_id === newSeatTypeId);
-                    const arrivalTime = selectedSlot && selectedSeat
-                      ? calcArrivalTime(selectedSlot.slot_time, SEAT_ARRIVAL_OFFSET[selectedSeat.category as SeatCategory] ?? 0)
-                      : null;
-                    return arrivalTime ? (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-800">
-                        🕐 ご来店予定時間：<strong>{arrivalTime}頃</strong>
-                      </div>
-                    ) : null;
-                  })()}
                 </>
               )}
               <div>

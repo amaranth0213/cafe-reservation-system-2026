@@ -69,32 +69,7 @@
       "Bash(curl -s -X PATCH 'https://ecacxflawvimxmkhievy.supabase.co/rest/v1/seat_types?category=eq.double' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjYWN4Zmxhd3ZpbXhta2hpZXZ5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQwMDk5MywiZXhwIjoyMDkxOTc2OTkzfQ.nDBIwRrYserp-H7NmDfd-P-MXS6KaYlVdpU5tVG6J4Y' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjYWN4Zmxhd3ZpbXhta2hpZXZ5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjQwMDk5MywiZXhwIjoyMDkxOTc2OTkzfQ.nDBIwRrYserp-H7NmDfd-P-MXS6KaYlVdpU5tVG6J4Y' -H 'Content-Type: application/json' -H 'Prefer: return=representation' -d '{\"total_count\": 2}')",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)",
-      "Bash(ffprobe -v quiet -print_format json -show_format -show_streams \"/private/var/folders/ht/8bdhsr4d0blbw9rnxznh_28r0000gn/T/TemporaryItems/com.apple.Photos.NSItemProvider/uuid=73B142D1-28FE-444F-98BA-A9230B4B9678&code=001&library=1&type=3&mode=1&loc=true&cap=true.mp4/予約を受付開始しました.mp4\")",
-      "Bash(mdls \"/private/var/folders/ht/8bdhsr4d0blbw9rnxznh_28r0000gn/T/TemporaryItems/com.apple.Photos.NSItemProvider/uuid=73B142D1-28FE-444F-98BA-A9230B4B9678&code=001&library=1&type=3&mode=1&loc=true&cap=true.mp4/予約を受付開始しました.mp4\")",
-      "Bash(afinfo \"/private/var/folders/ht/8bdhsr4d0blbw9rnxznh_28r0000gn/T/TemporaryItems/com.apple.Photos.NSItemProvider/uuid=73B142D1-28FE-444F-98BA-A9230B4B9678&code=001&library=1&type=3&mode=1&loc=true&cap=true.mp4/予約を受付開始しました.mp4\")",
-      "Bash(open -a \"QuickTime Player\" \"/private/var/folders/ht/8bdhsr4d0blbw9rnxznh_28r0000gn/T/TemporaryItems/com.apple.Photos.NSItemProvider/uuid=73B142D1-28FE-444F-98BA-A9230B4B9678&code=001&library=1&type=3&mode=1&loc=true&cap=true.mp4/予約を受付開始しました.mp4\")",
-      "Bash(open -a \"QuickTime Player\" '/private/var/folders/ht/8bdhsr4d0blbw9rnxznh_28r0000gn/T/TemporaryItems/com.apple.Photos.NSItemProvider/uuid=73B142D1-28FE-444F-98BA-A9230B4B9678&code=001&library=1&type=3&mode=1&loc=true&cap=true.mp4/予約を受付開始しました.mp4')",
-      "WebFetch(domain:n4hntd.csb.app)",
-      "WebFetch(domain:codesandbox.io)",
-      "Bash(npx create-next-app@latest yomikatarik-tool --typescript --app --no-tailwind --no-eslint --src-dir=false --import-alias=\"@/*\")",
-      "Bash(rm -rf yomikatarik-tool)",
-      "Bash(npx create-next-app@15 yomikatarik-tool --typescript --app --no-tailwind --no-eslint --src-dir=false --import-alias=\"@/*\")",
-      "Bash(npx create-next-app@15 yomikatarik-tool --typescript --app --no-tailwind --no-eslint --no-src-dir --import-alias=\"@/*\")",
-      "Bash(npx --yes create-next-app@\">=15.0.0 <=15.5.2\" yomikatarik-tool --typescript --app --no-tailwind --no-eslint --no-src-dir --import-alias=\"@/*\" --no-turbopack)",
-      "Bash(npm uninstall *)",
-      "Bash(npx --yes create-next-app@latest yomikatarik-tool --typescript --app --no-tailwind --no-eslint --no-src-dir --import-alias=\"@/*\" --no-turbopack)",
-      "Bash(git commit -m '初期コミット：絵本読みがたりボランティア担当クラス表ツール *)",
-      "Bash(gh repo *)",
-      "Bash(brew install *)",
-      "mcp__Claude_in_Chrome__form_input",
-      "mcp__Claude_in_Chrome__read_page",
-      "Bash(git remote *)",
-      "Bash(npx wrangler *)",
-      "WebFetch(domain:yomikatarik-tool.harupi9051.workers.dev)",
-      "Bash(git commit -m '2026年度年間日程の事前登録ボタンを追加 *)",
-      "Bash(npx opennextjs-cloudflare *)",
-      "Bash(supabase --version)"
+      "Bash(git push *)"
     ]
   }
 }
