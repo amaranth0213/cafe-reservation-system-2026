@@ -297,8 +297,9 @@ export default function AdminReservationsPage() {
                       ? calcArrivalTime(selectedSlot.slot_time, SEAT_ARRIVAL_OFFSET[selectedSeat.category as SeatCategory] ?? 0)
                       : null;
                     return arrivalTime ? (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-800">
-                        🕐 ご来店予定時間：<strong>{arrivalTime}頃</strong>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-sm text-blue-800 space-y-1">
+                        <div>📋 予約枠：<strong>{SLOT_TIME_LABELS[selectedSlot.slot_time as keyof typeof SLOT_TIME_LABELS]}の回</strong></div>
+                        <div>🕐 ご来店予定：<strong>{arrivalTime}頃</strong></div>
                       </div>
                     ) : null;
                   })()}

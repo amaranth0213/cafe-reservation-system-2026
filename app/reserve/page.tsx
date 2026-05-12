@@ -432,9 +432,10 @@ export default function ReservePage() {
                   const slot = slotAvailability.find(s => s.time_slot_id === selectedSlotId);
                   const offset = SEAT_ARRIVAL_OFFSET[selectedSeatType.category] ?? 0;
                   const arrivalTime = slot ? calcArrivalTime(slot.slot_time, offset) : null;
-                  return arrivalTime && offset > 0 ? (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 mb-2">
-                      🕐 ご来店予定時間：<strong>{arrivalTime}頃</strong>にお越しください
+                  return arrivalTime ? (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 mb-2 space-y-1">
+                      <div>📋 予約枠：<strong>{SLOT_TIME_LABELS[slot.slot_time]}の回</strong></div>
+                      <div>🕐 ご来店予定：<strong>{arrivalTime}頃</strong></div>
                     </div>
                   ) : null;
                 })()}
@@ -616,8 +617,8 @@ export default function ReservePage() {
                 )}
                 {selectedSlotTime && (
                   <div className="flex justify-between">
-                    <dt className="text-gray-500">時間帯</dt>
-                    <dd className="font-medium">{SLOT_TIME_LABELS[selectedSlotTime as SlotTime]}</dd>
+                    <dt className="text-gray-500">予約枠</dt>
+                    <dd className="font-medium">{SLOT_TIME_LABELS[selectedSlotTime as SlotTime]}の回</dd>
                   </div>
                 )}
                 {selectedSlotTime && selectedSeatCategory && (() => {
