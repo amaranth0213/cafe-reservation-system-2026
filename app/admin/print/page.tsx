@@ -253,6 +253,43 @@ export default function PrintCardsPage() {
             <a href="/admin/reservations" className="text-sm text-gray-500 hover:text-gray-700">← 予約一覧に戻る</a>
           </div>
 
+          {/* 当日お客様一覧表 */}
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-3 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-blue-800">当日お客様一覧表</p>
+              <p className="text-xs text-blue-600 mt-0.5">時間帯ごとのお客様リストを印刷します（来店チェック用）</p>
+            </div>
+            <div className="flex flex-col items-end gap-1">
+              {openDays.slice(0, 3).map(d => (
+                <a
+                  key={d.id}
+                  href={`/print/daylist?date=${d.date}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-blue-600 transition-colors whitespace-nowrap"
+                >
+                  📋 {d.date.slice(5).replace('-', '/')} 印刷
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* お菓子在庫シート */}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-amber-800">お菓子 在庫チェックシート</p>
+              <p className="text-xs text-amber-600 mt-0.5">当日の在庫を□で管理できる用紙を印刷します</p>
+            </div>
+            <a
+              href="/print/stock"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-600 transition-colors whitespace-nowrap"
+            >
+              🍡 印刷する
+            </a>
+          </div>
+
           <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
             <div className="flex items-center justify-between mb-3">
               <label className="block text-sm font-medium text-gray-700">印刷する営業日を選択（複数可）</label>

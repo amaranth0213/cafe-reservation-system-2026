@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { ReservationType, SeatCategory, SlotTime, OrderItem } from '@/types';
-import { SEAT_LABELS, SLOT_TIME_LABELS, RESERVATION_TYPE_LABELS } from '@/types';
-import { formatDateJP, isReservationOpen, getReservationOpenTimeLabel } from '@/lib/business-days';
+import { SEAT_LABELS, SLOT_TIME_LABELS, RESERVATION_TYPE_LABELS, SEAT_ARRIVAL_OFFSET, calcArrivalTime } from '@/types';
+import { formatDateJP, isReservationOpen, getReservationOpenTimeLabel, isSweetsAvailable, getSweetsDeadlineLabel } from '@/lib/business-days';
 
 interface BusinessDayData {
   id: string;
@@ -314,22 +314,36 @@ export default function ReservePage() {
             {/* 予約タイプ以降は予約可能な日付が選ばれたときのみ表示 */}
             {isSelectedDateBookable && <div className="card">
               <h2 className="text-lg font-semibold text-matcha-800 mb-4">予約タイプ</h2>
-              <div className="space-y-2">
-                {(['seat_only', 'seat_with_food', 'takeout'] as ReservationType[])
-                  .map((type) => (
-                  <label key={type} className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:border-matcha-300 transition-all">
-                    <input
-                      type="radio"
-                      name="reservation_type"
-                      value={type}
-                      checked={reservationType === type}
-                      onChange={() => setReservationType(type)}
-                      className="accent-matcha-600"
-                    />
-                    <span className="text-sm font-medium">{RESERVATION_TYPE_LABELS[type]}</span>
-                  </label>
-                ))}
-              </div>
+              {(() => {
+                const sweetsOk = selectedDate ? isSweetsAvailable(selectedDate) : true;
+                return (
+                  <>
+                    {!sweetsOk && (
+                      <div className="mb-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                        ⏰ お菓子の注文受付は{selectedDate ? getSweetsDeadlineLabel(selectedDate) : '前日20時'}に締め切りました。<br />
+                        「席のみ」でご予約いただけます。
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      {(['seat_only', 'seat_with_food', 'takeout'] as ReservationType[])
+                        .filter((type) => sweetsOk || type === 'seat_only')
+                        .map((type) => (
+                        <label key={type} className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:border-matcha-300 transition-all">
+                          <input
+                            type="radio"
+                            name="reservation_type"
+                            value={type}
+                            checked={reservationType === type}
+                            onChange={() => setReservationType(type)}
+                            className="accent-matcha-600"
+                          />
+                          <span className="text-sm font-medium">{RESERVATION_TYPE_LABELS[type]}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
             </div>}
 
             {/* 時間帯選択（テイクアウトのみ以外） */}
@@ -414,6 +428,16 @@ export default function ReservePage() {
                       );
                     })}
                 </div>
+                {selectedSeatTypeId && selectedSeatType && (() => {
+                  const slot = slotAvailability.find(s => s.time_slot_id === selectedSlotId);
+                  const offset = SEAT_ARRIVAL_OFFSET[selectedSeatType.category] ?? 0;
+                  const arrivalTime = slot ? calcArrivalTime(slot.slot_time, offset) : null;
+                  return arrivalTime && offset > 0 ? (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 mb-2">
+                      🕐 ご来店予定時間：<strong>{arrivalTime}頃</strong>にお越しください
+                    </div>
+                  ) : null;
+                })()}
                 {selectedSeatTypeId && (
                   <div>
                     <label className="label">人数</label>
@@ -596,6 +620,16 @@ export default function ReservePage() {
                     <dd className="font-medium">{SLOT_TIME_LABELS[selectedSlotTime as SlotTime]}</dd>
                   </div>
                 )}
+                {selectedSlotTime && selectedSeatCategory && (() => {
+                  const offset = SEAT_ARRIVAL_OFFSET[selectedSeatCategory as SeatCategory] ?? 0;
+                  const arrival = calcArrivalTime(selectedSlotTime, offset);
+                  return (
+                    <div className="flex justify-between">
+                      <dt className="text-gray-500">ご来店時間</dt>
+                      <dd className="font-medium text-blue-700">{arrival}頃</dd>
+                    </div>
+                  );
+                })()}
                 <div className="flex justify-between">
                   <dt className="text-gray-500">予約タイプ</dt>
                   <dd className="font-medium">{RESERVATION_TYPE_LABELS[reservationType as ReservationType]}</dd>

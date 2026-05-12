@@ -1,4 +1,4 @@
-export type SeatCategory = 'single' | 'double' | 'quad';
+export type SeatCategory = 'single' | 'double' | 'sofa' | 'quad';
 export type ReservationType = 'seat_only' | 'seat_with_food' | 'takeout';
 export type ReservationStatus = 'confirmed' | 'cancelled';
 export type SlotTime = '09:30' | '11:30' | '13:30';
@@ -116,10 +116,29 @@ export interface OrderItem {
 
 // 座席カテゴリの表示名
 export const SEAT_LABELS: Record<SeatCategory, string> = {
+  sofa: 'ソファ席（2人）',
   single: '1人席',
-  double: '2人席',
+  double: '椅子席（2人）',
   quad: '4人席',
 };
+
+// 席種ごとの到着時間オフセット（分）
+// ソファ席→0分、1人席→10分、椅子席→20分、4人席→30分
+export const SEAT_ARRIVAL_OFFSET: Record<SeatCategory, number> = {
+  sofa: 0,
+  single: 10,
+  double: 20,
+  quad: 30,
+};
+
+// スロット時間＋オフセットで到着予定時間を計算
+export function calcArrivalTime(slotTime: string, offsetMinutes: number): string {
+  const [h, m] = slotTime.split(':').map(Number);
+  const total = h * 60 + m + offsetMinutes;
+  const rh = Math.floor(total / 60);
+  const rm = total % 60;
+  return `${rh}:${String(rm).padStart(2, '0')}`;
+}
 
 export const SLOT_TIME_LABELS: Record<SlotTime, string> = {
   '09:30': '9:30〜',
