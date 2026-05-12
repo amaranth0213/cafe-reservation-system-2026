@@ -94,9 +94,9 @@ export default async function PrintDayListPage({
 
   const { slots, takeouts, date } = await getDayList(targetDate);
 
-  const dateObj = new Date(date + 'T00:00:00+09:00');
-  const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
-  const dateLabel = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日（${weekdays[dateObj.getDay()]}）`;
+  const [y, mo, d] = date.split('-').map(Number);
+  const weekdayStr = new Date(`${date}T12:00:00+09:00`).toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo', weekday: 'narrow' });
+  const dateLabel = `${y}年${mo}月${d}日（${weekdayStr}）`;
 
   const totalCount = slots.reduce((sum: number, s: { reservations: unknown[] }) => sum + s.reservations.length, 0) + takeouts.length;
 

@@ -71,10 +71,10 @@ async function getStockData() {
 export default async function PrintStockPage() {
   const { menus, orderedMap, today } = await getStockData();
 
-  // 日付を日本語表示に変換
-  const dateObj = new Date(today + 'T00:00:00+09:00');
-  const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
-  const dateLabel = `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日（${weekdays[dateObj.getDay()]}）`;
+  // 日付を日本語表示に変換（正午JSTで生成してUTC日付ズレを防ぐ）
+  const [y, mo, d] = today.split('-').map(Number);
+  const weekdayStr = new Date(`${today}T12:00:00+09:00`).toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo', weekday: 'narrow' });
+  const dateLabel = `${y}年${mo}月${d}日（${weekdayStr}）`;
 
   return (
     <>
