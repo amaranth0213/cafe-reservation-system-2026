@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { getSlotAvailability, closeSlotIfFull } from '@/lib/availability';
-import { generateReservationCode, getNextMondayDate } from '@/lib/business-days';
+import { generateReservationCode, getNextMondayDate, isSweetsAvailable } from '@/lib/business-days';
 import { notifyNewReservation } from '@/lib/notify';
 import type { ReservationType, OrderItem } from '@/types';
 
@@ -40,6 +40,24 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = createServerClient();
+
+  // お菓子受付締め切りチェック（前日20時）
+  if (reservation_type === 'seat_with_food' || reservation_type === 'takeout') {
+    let businessDate: string | null = null;
+    if (time_slot_id) {
+      const { data: tsData } = await supabase
+        .from('time_slots').select('business_days(date)').eq('id', time_slot_id).single();
+      businessDate = (tsData?.business_days as unknown as { date: string } | null)?.date ?? null;
+    } else {
+      businessDate = getNextMondayDate();
+    }
+    if (businessDate && !isSweetsAvailable(businessDate)) {
+      return NextResponse.json(
+        { error: 'お菓子の受付は前日20時に締め切りました。「席のみ」でご予約ください。' },
+        { status: 400 }
+      );
+    }
+  }
 
   // 空席確認（席予約の場合）
   if (time_slot_id && seat_type_id) {
