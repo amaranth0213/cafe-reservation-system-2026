@@ -127,7 +127,7 @@ export default async function PrintStockPage() {
           margin: 1.5mm;
           vertical-align: middle;
           border-radius: 2px;
-          font-size: 7.5px;
+          font-size: 10px;
           font-weight: bold;
           line-height: 1;
         }
