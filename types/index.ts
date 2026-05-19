@@ -1,4 +1,4 @@
-export type SeatCategory = 'single' | 'double' | 'quad';
+export type SeatCategory = 'single' | 'double' | 'sofa' | 'quad';
 export type ReservationType = 'seat_only' | 'seat_with_food' | 'takeout';
 export type ReservationStatus = 'confirmed' | 'cancelled';
 export type SlotTime = '09:30' | '11:30' | '13:30';
@@ -116,8 +116,9 @@ export interface OrderItem {
 
 // 座席カテゴリの表示名
 export const SEAT_LABELS: Record<SeatCategory, string> = {
+  sofa: 'ソファ席（2人）',
   single: '1人席',
-  double: '2人席',
+  double: '椅子席（2人）',
   quad: '4人席',
 };
 
