@@ -3,6 +3,9 @@ export const dynamic = 'force-dynamic';
 import { createServerClient } from '@/lib/supabase/server';
 import PrintButton from './PrintButton';
 
+// 各メニューの予約済み情報：スロット時間ごとの個数
+type OrderedDetail = { slot_time: string; quantity: number };
+
 async function getStockData() {
   const supabase = createServerClient();
 
@@ -33,48 +36,74 @@ async function getStockData() {
     .gt('stock', 0)
     .order('name');
 
-  if (!menus?.length) return { menus: [], orderedMap: {}, displayDate: businessDay?.date ?? today };
+  if (!menus?.length) return { menus: [], orderedDetails: {}, displayDate: businessDay?.date ?? today };
 
-  // 今日のオンライン注文済み数を集計
-  const orderedMap: Record<string, number> = {};
+  // メニューごとの予約済み詳細（スロット時間別）
+  const orderedDetails: Record<string, OrderedDetail[]> = {};
 
   if (businessDay) {
     const { data: slots } = await supabase
       .from('time_slots')
-      .select('id')
-      .eq('business_day_id', businessDay.id);
+      .select('id, slot_time')
+      .eq('business_day_id', businessDay.id)
+      .order('slot_time', { ascending: true });
 
-    const slotIds = (slots ?? []).map((s: { id: string }) => s.id);
+    const slotTimeMap: Record<string, string> = {};
+    for (const slot of slots ?? []) {
+      slotTimeMap[slot.id] = slot.slot_time;
+    }
+
+    const slotIds = Object.keys(slotTimeMap);
 
     if (slotIds.length > 0) {
       const { data: reservations } = await supabase
         .from('reservations')
-        .select('id')
+        .select('id, time_slot_id')
         .in('time_slot_id', slotIds)
         .eq('status', 'confirmed');
 
-      const reservationIds = (reservations ?? []).map((r: { id: string }) => r.id);
+      const reservationSlotMap: Record<string, string> = {};
+      for (const res of reservations ?? []) {
+        if (res.time_slot_id) {
+          reservationSlotMap[res.id] = slotTimeMap[res.time_slot_id];
+        }
+      }
+
+      const reservationIds = Object.keys(reservationSlotMap);
 
       if (reservationIds.length > 0) {
         const { data: items } = await supabase
           .from('reservation_items')
-          .select('menu_id, quantity')
+          .select('menu_id, quantity, reservation_id')
           .in('reservation_id', reservationIds);
 
         for (const item of items ?? []) {
-          orderedMap[item.menu_id] = (orderedMap[item.menu_id] ?? 0) + item.quantity;
+          const slotTime = reservationSlotMap[item.reservation_id];
+          if (!slotTime) continue;
+          if (!orderedDetails[item.menu_id]) orderedDetails[item.menu_id] = [];
+          const existing = orderedDetails[item.menu_id].find(e => e.slot_time === slotTime);
+          if (existing) {
+            existing.quantity += item.quantity;
+          } else {
+            orderedDetails[item.menu_id].push({ slot_time: slotTime, quantity: item.quantity });
+          }
         }
       }
     }
   }
 
-  return { menus, orderedMap, displayDate: businessDay?.date ?? today };
+  return { menus, orderedDetails, displayDate: businessDay?.date ?? today };
+}
+
+// 時間を短縮表示（9:30 → 9:30）
+function shortTime(slot_time: string): string {
+  return slot_time.replace(':00', '').replace(/^0/, '');
 }
 
 export default async function PrintStockPage() {
-  const { menus, orderedMap, displayDate } = await getStockData();
+  const { menus, orderedDetails, displayDate } = await getStockData();
 
-  // 日付を日本語表示に変換（正午JSTで生成してUTC日付ズレを防ぐ）
+  // 日付を日本語表示に変換
   const [y, mo, d] = displayDate.split('-').map(Number);
   const weekdayStr = new Date(`${displayDate}T12:00:00+09:00`).toLocaleDateString('ja-JP', { timeZone: 'Asia/Tokyo', weekday: 'narrow' });
   const dateLabel = `${y}年${mo}月${d}日（${weekdayStr}）`;
@@ -89,20 +118,27 @@ export default async function PrintStockPage() {
         }
         body { font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif; }
         .box {
-          display: inline-block;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
           width: 14mm;
           height: 14mm;
           border: 1.5px solid #555;
           margin: 1.5mm;
           vertical-align: middle;
           border-radius: 2px;
+          font-size: 7.5px;
+          font-weight: bold;
+          line-height: 1;
         }
         .box-filled {
-          background-color: #aaa;
-          border-color: #888;
+          background-color: #888;
+          border-color: #666;
+          color: white;
         }
         .box-empty {
           background-color: white;
+          color: transparent;
         }
       `}</style>
 
@@ -117,7 +153,7 @@ export default async function PrintStockPage() {
           お菓子 在庫チェックシート（{dateLabel}）
         </p>
         <p style={{ color: '#888', marginBottom: '10px', fontSize: '12px' }}>
-          ※ 灰色の□＝オンライン予約済み　白い□＝注文が入ったら塗る
+          ※ 灰色の□＝オンライン予約済み（時間入り）　白い□＝注文が入ったら塗る
         </p>
         <PrintButton />
       </div>
@@ -130,7 +166,7 @@ export default async function PrintStockPage() {
             お菓子 在庫チェックシート
           </h1>
           <p style={{ fontSize: '13px', margin: '2px 0 0', color: '#555' }}>
-            {dateLabel}　　灰色の□＝オンライン予約済み　白い□＝当日注文で塗る
+            {dateLabel}　　灰色の□＝オンライン予約済み（時間入り）　白い□＝当日注文で塗る
           </p>
         </div>
 
@@ -141,7 +177,13 @@ export default async function PrintStockPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {menus.map((menu: { id: string; name: string; stock: number; hold_count: number | null; price: number }) => {
               const totalStock = menu.stock;
-              const onlineOrdered = orderedMap[menu.id] ?? 0;
+              const details = (orderedDetails[menu.id] ?? []).sort((a, b) => a.slot_time.localeCompare(b.slot_time));
+              // 時間ごとの四角を展開
+              const orderedSquares: string[] = [];
+              for (const { slot_time, quantity } of details) {
+                for (let i = 0; i < quantity; i++) orderedSquares.push(slot_time);
+              }
+              const onlineOrdered = orderedSquares.length;
               const remaining = totalStock - onlineOrdered;
 
               return (
@@ -163,16 +205,17 @@ export default async function PrintStockPage() {
 
                   {/* チェックボックス一覧 */}
                   <div style={{ lineHeight: 1 }}>
-                    {Array.from({ length: totalStock }, (_, i) => (
-                      <span
-                        key={i}
-                        className={`box ${i < onlineOrdered ? 'box-filled' : 'box-empty'}`}
-                        title={i < onlineOrdered ? 'オンライン予約済み' : '空き'}
-                      />
+                    {orderedSquares.map((slot_time, i) => (
+                      <span key={i} className="box box-filled">
+                        {shortTime(slot_time)}
+                      </span>
+                    ))}
+                    {Array.from({ length: remaining }, (_, i) => (
+                      <span key={`empty-${i}`} className="box box-empty">　</span>
                     ))}
                   </div>
 
-                  {/* 凡例（右下） */}
+                  {/* 凡例 */}
                   <div style={{ marginTop: '6px', fontSize: '11px', color: '#999' }}>
                     ← オンライン予約済み {onlineOrdered}個 ｜ 当日受付分 {remaining}個 →
                   </div>
