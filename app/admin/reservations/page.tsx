@@ -207,9 +207,10 @@ export default function AdminReservationsPage() {
 
       {/* 手動予約フォーム */}
       {showNewForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-xl flex flex-col max-h-[90vh]">
-          <div className="p-6 overflow-y-auto flex-1">
+        <div className="fixed inset-0 bg-black/50 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-xl">
+          <div className="p-6">
             <h3 className="text-lg font-semibold mb-4">予約を手動登録</h3>
             <p className="text-xs text-matcha-600 bg-matcha-50 rounded-lg px-3 py-2 mb-4">受付期間前でも登録できます（管理者専用）</p>
             <div className="space-y-4">
@@ -277,13 +278,14 @@ export default function AdminReservationsPage() {
                 <input type="text" value={newNotes} onChange={e => setNewNotes(e.target.value)} className="input" placeholder="アレルギーなど" />
               </div>
             </div>
-          </div>
-            <div className="flex gap-3 p-6 pt-4 border-t border-gray-100">
+            <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100">
               <button onClick={() => setShowNewForm(false)} className="btn-secondary flex-1 py-2">キャンセル</button>
               <button onClick={handleCreateReservation} disabled={creating || !newName.trim() || !newPhone.trim()} className="btn-primary flex-1 py-2">
                 {creating ? '登録中...' : '予約を登録'}
               </button>
             </div>
+          </div>
+          </div>
           </div>
         </div>
       )}
@@ -500,9 +502,10 @@ export default function AdminReservationsPage() {
 
       {/* 編集モーダル */}
       {editTarget && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-xl flex flex-col max-h-[90vh]">
-          <div className="p-6 overflow-y-auto flex-1">
+        <div className="fixed inset-0 bg-black/50 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-xl">
+          <div className="p-6">
             <h3 className="text-lg font-semibold mb-1">予約を編集</h3>
             <p className="text-sm text-gray-500 mb-4">{editTarget.reservation_code}</p>
             <div className="space-y-4">
@@ -553,13 +556,14 @@ export default function AdminReservationsPage() {
                 </div>
               )}
             </div>
-          </div>
-            <div className="flex gap-3 p-6 pt-4 border-t border-gray-100">
+            <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100">
               <button onClick={() => setEditTarget(null)} className="btn-secondary flex-1 py-2">戻る</button>
               <button onClick={handleSaveEdit} disabled={saving || !editName.trim() || !editPhone.trim()} className="btn-primary flex-1 py-2">
                 {saving ? '保存中...' : '保存する'}
               </button>
             </div>
+          </div>
+          </div>
           </div>
         </div>
       )}

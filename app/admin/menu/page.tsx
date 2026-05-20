@@ -139,9 +139,10 @@ export default function AdminMenuPage() {
 
       {/* 編集/追加モーダル */}
       {editing && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-xl flex flex-col max-h-[90vh]">
-          <div className="p-6 overflow-y-auto flex-1">
+        <div className="fixed inset-0 bg-black/50 z-50 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-xl">
+          <div className="p-6">
             <h3 className="text-lg font-semibold mb-4">{isNew ? 'メニューを追加' : 'メニューを編集'}</h3>
             <div className="space-y-4">
               <div>
@@ -230,13 +231,14 @@ export default function AdminMenuPage() {
                 テイクアウト可能
               </label>
             </div>
-            </div>
-            <div className="flex gap-3 p-6 pt-4 border-t border-gray-100">
+            <div className="flex gap-3 mt-6 pt-4 border-t border-gray-100">
               <button onClick={() => setEditing(null)} className="btn-secondary flex-1 py-2">キャンセル</button>
               <button onClick={handleSave} disabled={saving || !editing.name?.trim()} className="btn-primary flex-1 py-2">
                 {saving ? '保存中...' : '保存する'}
               </button>
             </div>
+          </div>
+          </div>
           </div>
         </div>
       )}
