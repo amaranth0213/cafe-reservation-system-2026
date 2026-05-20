@@ -266,6 +266,9 @@ export default function ReservePage() {
                           setSelectedDate(bd.date);
                           setSelectedSlotId('');
                           setSelectedSlotTime('');
+                          setReservationType('');
+                          setSelectedSeatTypeId('');
+                          setSelectedSeatCategory('');
                         }}
                         className={`p-3 rounded-lg border text-sm text-left transition-all ${
                           isSelected

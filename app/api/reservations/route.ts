@@ -41,6 +41,19 @@ export async function POST(request: NextRequest) {
 
   const supabase = createServerClient();
 
+  // 休業日チェック（time_slot_idがある場合）
+  if (time_slot_id) {
+    const { data: tsData } = await supabase
+      .from('time_slots')
+      .select('business_days(is_open)')
+      .eq('id', time_slot_id)
+      .single();
+    const isOpen = (tsData?.business_days as unknown as { is_open: boolean } | null)?.is_open;
+    if (isOpen === false) {
+      return NextResponse.json({ error: 'この日は休業日です' }, { status: 400 });
+    }
+  }
+
   // お菓子受付締め切りチェック（前日20時）
   if (reservation_type === 'seat_with_food' || reservation_type === 'takeout') {
     let businessDate: string | null = null;
