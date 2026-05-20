@@ -136,6 +136,19 @@ export async function POST(request: NextRequest) {
 
   const supabase = createServerClient();
 
+  // 休業日チェック
+  if (time_slot_id) {
+    const { data: tsData } = await supabase
+      .from('time_slots')
+      .select('business_days(is_open)')
+      .eq('id', time_slot_id)
+      .single();
+    const isOpen = (tsData?.business_days as unknown as { is_open: boolean } | null)?.is_open;
+    if (isOpen === false) {
+      return NextResponse.json({ error: 'この日は休業日です。予約できません。' }, { status: 400 });
+    }
+  }
+
   // 空席確認
   if (time_slot_id && seat_type_id) {
     const availability = await getSlotAvailability(time_slot_id);

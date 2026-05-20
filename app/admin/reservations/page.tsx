@@ -7,7 +7,7 @@ import { formatDateJP } from '@/lib/business-days';
 
 interface SlotOption { id: string; slot_time: string; }
 interface SeatOption { seat_type_id: string; category: string; capacity: number; remaining: number; }
-interface DayOption { id: string; date: string; time_slots: SlotOption[]; }
+interface DayOption { id: string; date: string; is_open: boolean; time_slots: SlotOption[]; }
 
 export default function AdminReservationsPage() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -228,7 +228,11 @@ export default function AdminReservationsPage() {
                     <label className="label">日程</label>
                     <select value={newDate} onChange={e => { setNewDate(e.target.value); setNewSlotId(''); setNewSeatTypeId(''); }} className="input">
                       <option value="">選択してください</option>
-                      {days.map(d => <option key={d.id} value={d.date}>{formatDateJP(d.date)}</option>)}
+                      {days.map(d => (
+                        <option key={d.id} value={d.date} disabled={!d.is_open}>
+                          {formatDateJP(d.date)}{!d.is_open ? '（休業日）' : ''}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   {newDate && (
