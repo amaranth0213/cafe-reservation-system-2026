@@ -281,14 +281,11 @@ export default function ReservePage() {
                         }`}
                       >
                         <div className="flex justify-between items-center">
-                          <span className={isClosed ? 'line-through text-gray-400' : ''}>{formatDateJP(bd.date)}</span>
-                          {isClosed && <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">休業日</span>}
+                          <span className={isClosed ? 'text-gray-400' : ''}>{formatDateJP(bd.date)}</span>
+                          {isClosed && <span className="badge-full">満席</span>}
                           {isBeforeOpen && <span className="text-xs text-matcha-400 bg-cream-100 px-2 py-0.5 rounded-full">受付前</span>}
                           {!isClosed && !isBeforeOpen && <span className="text-xs text-matcha-500 bg-matcha-100 px-2 py-0.5 rounded-full">受付中</span>}
                         </div>
-                        {isClosed && bd.note && (
-                          <p className="text-xs text-gray-400 mt-1">{bd.note}</p>
-                        )}
                       </button>
                     );
                   })}
@@ -301,7 +298,7 @@ export default function ReservePage() {
                 if (!bd) return null;
                 if (!bd.is_open) return (
                   <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500">
-                    この日は休業日です。{bd.note ? `（${bd.note}）` : ''}
+                    この日は満席です。他の日程をお選びください。
                   </div>
                 );
                 if (!isReservationOpen(bd.date)) return (
