@@ -190,9 +190,9 @@ export default function AdminReservationsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="space-y-2 sm:space-y-0 sm:flex sm:justify-between sm:items-center">
         <h1 className="text-2xl font-serif text-gray-800">予約一覧</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button onClick={() => setShowNewForm(true)} className="btn-primary text-sm py-2 px-4">
             ＋ 予約を手動登録
           </button>
@@ -207,12 +207,13 @@ export default function AdminReservationsPage() {
 
       {/* 手動予約フォーム */}
       {showNewForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl my-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-xl flex flex-col max-h-[90vh]">
+          <div className="p-6 overflow-y-auto flex-1">
             <h3 className="text-lg font-semibold mb-4">予約を手動登録</h3>
             <p className="text-xs text-matcha-600 bg-matcha-50 rounded-lg px-3 py-2 mb-4">受付期間前でも登録できます（管理者専用）</p>
             <div className="space-y-4">
-              <div>
+<div>
                 <label className="label">予約タイプ</label>
                 <select value={newType} onChange={e => { setNewType(e.target.value as typeof newType); setNewSlotId(''); setNewSeatTypeId(''); }} className="input">
                   <option value="seat_only">席のみ</option>
@@ -276,7 +277,8 @@ export default function AdminReservationsPage() {
                 <input type="text" value={newNotes} onChange={e => setNewNotes(e.target.value)} className="input" placeholder="アレルギーなど" />
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
+          </div>
+            <div className="flex gap-3 p-6 pt-4 border-t border-gray-100">
               <button onClick={() => setShowNewForm(false)} className="btn-secondary flex-1 py-2">キャンセル</button>
               <button onClick={handleCreateReservation} disabled={creating || !newName.trim() || !newPhone.trim()} className="btn-primary flex-1 py-2">
                 {creating ? '登録中...' : '予約を登録'}
@@ -498,8 +500,9 @@ export default function AdminReservationsPage() {
 
       {/* 編集モーダル */}
       {editTarget && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl my-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-xl flex flex-col max-h-[90vh]">
+          <div className="p-6 overflow-y-auto flex-1">
             <h3 className="text-lg font-semibold mb-1">予約を編集</h3>
             <p className="text-sm text-gray-500 mb-4">{editTarget.reservation_code}</p>
             <div className="space-y-4">
@@ -550,7 +553,8 @@ export default function AdminReservationsPage() {
                 </div>
               )}
             </div>
-            <div className="flex gap-3 mt-6">
+          </div>
+            <div className="flex gap-3 p-6 pt-4 border-t border-gray-100">
               <button onClick={() => setEditTarget(null)} className="btn-secondary flex-1 py-2">戻る</button>
               <button onClick={handleSaveEdit} disabled={saving || !editName.trim() || !editPhone.trim()} className="btn-primary flex-1 py-2">
                 {saving ? '保存中...' : '保存する'}
