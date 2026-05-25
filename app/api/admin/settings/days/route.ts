@@ -14,7 +14,7 @@ export async function GET() {
     .from('business_days')
     .select(`
       id, date, is_open, note,
-      time_slots (id, slot_time, is_accepting)
+      time_slots (id, slot_time, is_accepting, slot_time.order(asc))
     `)
     .gte('date', today)
     .order('date')
