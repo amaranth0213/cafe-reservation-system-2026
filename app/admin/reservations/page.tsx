@@ -240,7 +240,7 @@ export default function AdminReservationsPage() {
                       <label className="label">時間帯</label>
                       <select value={newSlotId} onChange={e => { setNewSlotId(e.target.value); setNewSeatTypeId(''); }} className="input">
                         <option value="">選択してください</option>
-                        {days.find(d => d.date === newDate)?.time_slots.map(s => (
+                        {[...(days.find(d => d.date === newDate)?.time_slots ?? [])].sort((a, b) => a.slot_time.localeCompare(b.slot_time)).map(s => (
                           <option key={s.id} value={s.id}>{SLOT_TIME_LABELS[s.slot_time as keyof typeof SLOT_TIME_LABELS] ?? s.slot_time}</option>
                         ))}
                       </select>
