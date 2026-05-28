@@ -252,7 +252,7 @@ export default function AdminReservationsPage() {
                       <select value={newSeatTypeId} onChange={e => { setNewSeatTypeId(e.target.value); setNewPartySize(1); }} className="input">
                         <option value="">選択してください</option>
                         {seatOptions.map(s => (
-                          <option key={s.seat_type_id} value={s.seat_type_id} disabled={s.remaining === 0}>
+                          <option key={s.seat_type_id} value={s.seat_type_id}>
                             {SEAT_LABELS[s.category as keyof typeof SEAT_LABELS]}（残{s.remaining}卓）
                           </option>
                         ))}

@@ -162,10 +162,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (seatTypeData) {
-      const targetSeat = availability.seats.find((s) => s.category === seatTypeData.category);
-      if (!targetSeat || targetSeat.remaining <= 0) {
-        return NextResponse.json({ error: 'この席種は満席です' }, { status: 409 });
-      }
+      // 管理者は満席でも予約可能（残数チェックはスキップ）
       if (party_size && party_size > seatTypeData.capacity) {
         return NextResponse.json({ error: `${seatTypeData.capacity}人席に${party_size}人は座れません` }, { status: 400 });
       }
