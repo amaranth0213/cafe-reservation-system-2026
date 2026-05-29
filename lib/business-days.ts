@@ -48,20 +48,19 @@ export function getReservationOpenTime(mondayDate: string): Date {
   return new Date(thursday.getTime() + 12 * 60 * 60 * 1000);
 }
 
-// お菓子受付締め切り：営業日（月曜）の前日（日曜）20:00 JST
+// お菓子受付締め切り：営業日（月曜）当日の朝4:00 JST
 export function getSweetsDeadline(mondayDate: string): Date {
   const monday = new Date(mondayDate + 'T00:00:00+09:00');
-  // 月曜0時JST - 4時間 = 日曜20時JST
-  return new Date(monday.getTime() - 4 * 60 * 60 * 1000);
+  // 月曜0時JST + 4時間 = 月曜4時JST
+  return new Date(monday.getTime() + 4 * 60 * 60 * 1000);
 }
 
-// お菓子締め切りの表示用文字列（例: 5月11日（日）20時）
+// お菓子締め切りの表示用文字列（例: 5月25日（月）朝4時）
 export function getSweetsDeadlineLabel(mondayDate: string): string {
   const monday = new Date(mondayDate + 'T00:00:00+09:00');
-  const sunday = new Date(monday.getTime() - 24 * 60 * 60 * 1000);
-  const month = sunday.getMonth() + 1;
-  const day = sunday.getDate();
-  return `${month}月${day}日（日）20時`;
+  const month = monday.getMonth() + 1;
+  const day = monday.getDate();
+  return `${month}月${day}日（月）朝4時`;
 }
 
 // 予約受付中かどうか（木曜12時以降）
