@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cafe-prep",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "/Users/haru/カフェ準備管理アプリ", "run", "dev"],
+      "port": 3001,
+      "autoPort": true
+    }
+  ]
+}

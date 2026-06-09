@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { ReservationType, SeatCategory, SlotTime, OrderItem } from '@/types';
-import { SEAT_LABELS, SLOT_TIME_LABELS, RESERVATION_TYPE_LABELS } from '@/types';
+import { SEAT_LABELS, SLOT_TIME_LABELS, RESERVATION_TYPE_LABELS, calcArrivalTime } from '@/types';
 import { formatDateJP, isReservationOpen, getReservationOpenTimeLabel, isSweetsAvailable, getSweetsDeadlineLabel } from '@/lib/business-days';
 
 interface BusinessDayData {
@@ -424,6 +424,11 @@ export default function ReservePage() {
                       );
                     })}
                 </div>
+                {selectedSeatCategory === 'quad' && selectedSlotTime && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+                    🕐 4人席のご来店予定時間：<strong>{calcArrivalTime(selectedSlotTime, 30)}</strong>
+                  </div>
+                )}
                 {selectedSeatTypeId && (
                   <div>
                     <label className="label">人数</label>
@@ -603,7 +608,11 @@ export default function ReservePage() {
                 {selectedSlotTime && (
                   <div className="flex justify-between">
                     <dt className="text-gray-500">時間帯</dt>
-                    <dd className="font-medium">{SLOT_TIME_LABELS[selectedSlotTime as SlotTime]}</dd>
+                    <dd className="font-medium">
+                      {selectedSeatCategory === 'quad'
+                        ? calcArrivalTime(selectedSlotTime, 30)
+                        : SLOT_TIME_LABELS[selectedSlotTime as SlotTime]}
+                    </dd>
                   </div>
                 )}
                 <div className="flex justify-between">

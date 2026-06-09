@@ -133,3 +133,12 @@ export const RESERVATION_TYPE_LABELS: Record<ReservationType, string> = {
   seat_with_food: '席 + お菓子（イートイン）',
   takeout: 'お持ち帰りのみ',
 };
+
+// スロット時間（"09:30"形式）にオフセット分を加えた表示用文字列を返す
+export function calcArrivalTime(slotTime: string, offsetMinutes: number): string {
+  const [h, m] = slotTime.split(':').map(Number);
+  const total = h * 60 + m + offsetMinutes;
+  const hh = Math.floor(total / 60);
+  const mm = total % 60;
+  return `${hh}:${String(mm).padStart(2, '0')}〜`;
+}
