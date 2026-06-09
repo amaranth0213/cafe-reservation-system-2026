@@ -100,7 +100,8 @@
       "Read(//private/tmp/pptx_charts/**)",
       "Bash(say -v '?')",
       "Bash(ffmpeg -version)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(npx supabase *)"
     ]
   }
 }

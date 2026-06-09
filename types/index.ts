@@ -1,7 +1,7 @@
 export type SeatCategory = 'single' | 'double' | 'sofa' | 'quad';
 export type ReservationType = 'seat_only' | 'seat_with_food' | 'takeout';
 export type ReservationStatus = 'confirmed' | 'cancelled';
-export type SlotTime = '09:30' | '11:30' | '13:30';
+export type SlotTime = '09:30' | '10:00' | '11:30' | '12:00' | '13:30' | '14:00';
 
 export interface SeatType {
   id: string;
@@ -124,9 +124,18 @@ export const SEAT_LABELS: Record<SeatCategory, string> = {
 
 export const SLOT_TIME_LABELS: Record<SlotTime, string> = {
   '09:30': '9:30〜',
+  '10:00': '10:00〜',
   '11:30': '11:30〜',
+  '12:00': '12:00〜',
   '13:30': '13:30〜',
+  '14:00': '14:00〜',
 };
+
+// 4人席専用スロット（10:00/12:00/14:00）かどうか
+export const QUAD_ONLY_SLOTS: SlotTime[] = ['10:00', '12:00', '14:00'];
+export function isQuadOnlySlot(slotTime: string): boolean {
+  return QUAD_ONLY_SLOTS.includes(slotTime as SlotTime);
+}
 
 export const RESERVATION_TYPE_LABELS: Record<ReservationType, string> = {
   seat_only: '席のみ',
@@ -134,11 +143,3 @@ export const RESERVATION_TYPE_LABELS: Record<ReservationType, string> = {
   takeout: 'お持ち帰りのみ',
 };
 
-// スロット時間（"09:30"形式）にオフセット分を加えた表示用文字列を返す
-export function calcArrivalTime(slotTime: string, offsetMinutes: number): string {
-  const [h, m] = slotTime.split(':').map(Number);
-  const total = h * 60 + m + offsetMinutes;
-  const hh = Math.floor(total / 60);
-  const mm = total % 60;
-  return `${hh}:${String(mm).padStart(2, '0')}〜`;
-}

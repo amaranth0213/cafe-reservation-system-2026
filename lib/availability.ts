@@ -1,5 +1,6 @@
 import { createServerClient } from './supabase/server';
 import type { SeatAvailability, SlotAvailability, SeatCategory } from '@/types';
+import { isQuadOnlySlot } from '@/types';
 
 // 時間帯の空席状況を取得
 export async function getSlotAvailability(timeSlotId: string): Promise<SlotAvailability | null> {
@@ -94,8 +95,13 @@ export async function closeSlotIfFull(timeSlotId: string): Promise<void> {
 
   if (!availability) return;
 
-  // 全座席種別が0になった場合（全卓埋まり）に締め切り
-  const allFull = availability.seats.every((s) => s.remaining === 0);
+  // 4人席専用スロット（10:00/12:00/14:00）は4人席のみ、それ以外は4人席以外の席で判定
+  const quadOnly = isQuadOnlySlot(availability.slot_time);
+  const relevantSeats = quadOnly
+    ? availability.seats.filter((s) => s.category === 'quad')
+    : availability.seats.filter((s) => s.category !== 'quad');
+
+  const allFull = relevantSeats.length > 0 && relevantSeats.every((s) => s.remaining === 0);
   if (allFull) {
     await supabase
       .from('time_slots')

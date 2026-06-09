@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { ReservationType, SeatCategory, SlotTime, OrderItem } from '@/types';
-import { SEAT_LABELS, SLOT_TIME_LABELS, RESERVATION_TYPE_LABELS, calcArrivalTime } from '@/types';
+import { SEAT_LABELS, SLOT_TIME_LABELS, RESERVATION_TYPE_LABELS, isQuadOnlySlot } from '@/types';
 import { formatDateJP, isReservationOpen, getReservationOpenTimeLabel, isSweetsAvailable, getSweetsDeadlineLabel } from '@/lib/business-days';
 
 interface BusinessDayData {
@@ -350,41 +350,55 @@ export default function ReservePage() {
                   <p className="text-gray-500 text-sm">読み込み中...</p>
                 ) : (
                   <div className="space-y-2">
-                    {slotAvailability.map((slot) => (
-                      <button
-                        key={slot.time_slot_id}
-                        type="button"
-                        disabled={!slot.is_accepting || slot.is_full}
-                        onClick={() => {
-                          setSelectedSlotId(slot.time_slot_id);
-                          setSelectedSlotTime(slot.slot_time);
-                          setSelectedSeatTypeId('');
-                        }}
-                        className={`w-full p-4 rounded-lg border text-left transition-all ${
-                          selectedSlotId === slot.time_slot_id
-                            ? 'border-matcha-500 bg-matcha-50'
-                            : slot.is_full || !slot.is_accepting
-                            ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
-                            : 'border-gray-200 hover:border-matcha-300'
-                        }`}
-                      >
-                        <div className="flex justify-between items-center">
-                          <span className="font-semibold text-matcha-700">{SLOT_TIME_LABELS[slot.slot_time]}</span>
-                          {slot.is_full || !slot.is_accepting ? (
-                            <span className="badge-full">満席</span>
-                          ) : (
-                            <span className="badge-available">受付中</span>
-                          )}
-                        </div>
-                        <div className="mt-2 flex gap-3 text-xs text-gray-500">
-                          {slot.seats.map((s) => (
-                            <span key={s.category}>
-                              {SEAT_LABELS[s.category]}: 残{s.remaining}/{s.total_count}卓
-                            </span>
-                          ))}
-                        </div>
-                      </button>
-                    ))}
+                    {slotAvailability.map((slot) => {
+                      const quadOnly = isQuadOnlySlot(slot.slot_time);
+                      // 表示対象の席に絞って満席判定
+                      const relevantSeats = quadOnly
+                        ? slot.seats.filter((s) => s.category === 'quad')
+                        : slot.seats.filter((s) => s.category !== 'quad');
+                      const effectiveFull = !slot.is_accepting || relevantSeats.every((s) => s.remaining === 0);
+                      return (
+                        <button
+                          key={slot.time_slot_id}
+                          type="button"
+                          disabled={effectiveFull}
+                          onClick={() => {
+                            setSelectedSlotId(slot.time_slot_id);
+                            setSelectedSlotTime(slot.slot_time);
+                            setSelectedSeatTypeId('');
+                            setSelectedSeatCategory('' as SeatCategory);
+                          }}
+                          className={`w-full p-4 rounded-lg border text-left transition-all ${
+                            selectedSlotId === slot.time_slot_id
+                              ? 'border-matcha-500 bg-matcha-50'
+                              : effectiveFull
+                              ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
+                              : 'border-gray-200 hover:border-matcha-300'
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-matcha-700">{SLOT_TIME_LABELS[slot.slot_time]}</span>
+                              {quadOnly && (
+                                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">4人席専用</span>
+                              )}
+                            </div>
+                            {effectiveFull ? (
+                              <span className="badge-full">満席</span>
+                            ) : (
+                              <span className="badge-available">受付中</span>
+                            )}
+                          </div>
+                          <div className="mt-2 flex gap-3 text-xs text-gray-500">
+                            {relevantSeats.map((s) => (
+                              <span key={s.category}>
+                                {SEAT_LABELS[s.category]}: 残{s.remaining}/{s.total_count}卓
+                              </span>
+                            ))}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -397,7 +411,9 @@ export default function ReservePage() {
                 <div className="space-y-2 mb-4">
                   {slotAvailability
                     .find((s) => s.time_slot_id === selectedSlotId)
-                    ?.seats.map((seat) => {
+                    ?.seats
+                    .filter((seat) => isQuadOnlySlot(selectedSlotTime) ? seat.category === 'quad' : seat.category !== 'quad')
+                    .map((seat) => {
                       return (
                         <button
                           key={seat.category}
@@ -424,11 +440,6 @@ export default function ReservePage() {
                       );
                     })}
                 </div>
-                {selectedSeatCategory === 'quad' && selectedSlotTime && (
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-                    🕐 4人席のご来店予定時間：<strong>{calcArrivalTime(selectedSlotTime, 30)}</strong>
-                  </div>
-                )}
                 {selectedSeatTypeId && (
                   <div>
                     <label className="label">人数</label>
@@ -608,11 +619,7 @@ export default function ReservePage() {
                 {selectedSlotTime && (
                   <div className="flex justify-between">
                     <dt className="text-gray-500">時間帯</dt>
-                    <dd className="font-medium">
-                      {selectedSeatCategory === 'quad'
-                        ? calcArrivalTime(selectedSlotTime, 30)
-                        : SLOT_TIME_LABELS[selectedSlotTime as SlotTime]}
-                    </dd>
+                    <dd className="font-medium">{SLOT_TIME_LABELS[selectedSlotTime as SlotTime]}</dd>
                   </div>
                 )}
                 <div className="flex justify-between">
