@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { Reservation } from '@/types';
-import { RESERVATION_TYPE_LABELS, SEAT_LABELS, SLOT_TIME_LABELS } from '@/types';
+import { RESERVATION_TYPE_LABELS, SEAT_LABELS, SLOT_TIME_LABELS, isQuadOnlySlot } from '@/types';
 import { formatDateJP } from '@/lib/business-days';
 
 interface SlotOption { id: string; slot_time: string; }
@@ -246,19 +246,24 @@ export default function AdminReservationsPage() {
                       </select>
                     </div>
                   )}
-                  {newSlotId && seatOptions.length > 0 && (
-                    <div>
-                      <label className="label">席種</label>
-                      <select value={newSeatTypeId} onChange={e => { setNewSeatTypeId(e.target.value); setNewPartySize(1); }} className="input">
-                        <option value="">選択してください</option>
-                        {seatOptions.map(s => (
-                          <option key={s.seat_type_id} value={s.seat_type_id}>
-                            {SEAT_LABELS[s.category as keyof typeof SEAT_LABELS]}（残{s.remaining}卓）
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
+                  {newSlotId && seatOptions.length > 0 && (() => {
+                    const selectedSlotTime = days.find(d => d.date === newDate)?.time_slots.find(s => s.id === newSlotId)?.slot_time ?? '';
+                    const quadOnly = isQuadOnlySlot(selectedSlotTime);
+                    const filteredSeats = seatOptions.filter(s => quadOnly ? s.category === 'quad' : s.category !== 'quad');
+                    return (
+                      <div>
+                        <label className="label">席種{quadOnly && <span className="ml-2 text-xs text-amber-600">（4人席専用）</span>}</label>
+                        <select value={newSeatTypeId} onChange={e => { setNewSeatTypeId(e.target.value); setNewPartySize(1); }} className="input">
+                          <option value="">選択してください</option>
+                          {filteredSeats.map(s => (
+                            <option key={s.seat_type_id} value={s.seat_type_id}>
+                              {SEAT_LABELS[s.category as keyof typeof SEAT_LABELS]}（残{s.remaining}卓）
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  })()}
                   {newSeatTypeId && (
                     <div>
                       <label className="label">人数</label>
