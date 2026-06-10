@@ -27,7 +27,7 @@ export default function AdminReservationsPage() {
   const [editPartySize, setEditPartySize] = useState(1);
   const [editNotes, setEditNotes] = useState('');
   const [editItems, setEditItems] = useState<{menu_id:string;menu_name:string;unit_price:number;quantity:number;is_takeout:boolean}[]>([]);
-  const [menus, setMenus] = useState<{id:string;name:string;price:number;is_takeout_available:boolean}[]>([]);
+  const [menus, setMenus] = useState<{id:string;name:string;price:number;is_takeout_available:boolean;is_available:boolean}[]>([]);
   const [saving, setSaving] = useState(false);
 
   // 手動予約フォーム
@@ -124,8 +124,8 @@ export default function AdminReservationsPage() {
       quantity: i.quantity,
       is_takeout: i.is_takeout,
     })));
-    // メニュー一覧を取得（管理用：非表示メニューも含む全件）
-    fetch('/api/admin/menu').then(r => r.json()).then(setMenus).catch(() => {});
+    // メニュー一覧を取得（表示中のメニューのみ）
+    fetch('/api/admin/menu').then(r => r.json()).then((data) => setMenus((data ?? []).filter((m: {is_available: boolean}) => m.is_available))).catch(() => {});
   };
 
   const updateEditItem = (menuId: string, menuName: string, price: number, qty: number, isTakeout: boolean) => {

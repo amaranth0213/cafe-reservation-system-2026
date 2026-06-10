@@ -101,7 +101,10 @@
       "Bash(say -v '?')",
       "Bash(ffmpeg -version)",
       "Bash(git commit *)",
-      "Bash(npx supabase *)"
+      "Bash(npx supabase *)",
+      "Bash(curl -s \"https://cafe-reservation-system-2026.vercel.app/api/menus\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(len\\(d\\)\\); [print\\(m['name']\\) for m in d]\")",
+      "Bash(curl -sI \"https://cafe-reservation-system-2026.vercel.app/api/menus\")"
     ]
   }
 }
