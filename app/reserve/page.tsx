@@ -213,10 +213,10 @@ export default function ReservePage() {
           <h1 className="text-3xl font-serif text-matcha-800 mt-3"><span className="text-lg text-matcha-600">お茶と甘いもの</span>　あまらんす</h1>
           <p className="text-gray-600 text-base mt-2">毎週月曜日、９：３０〜１５：３０（３部制）</p>
           <p className="text-gray-600 text-sm">手作りお菓子をゆっくりお楽しみください</p>
-          <div className="mt-4 p-3 bg-amber-50 border-l-4 border-amber-400 rounded-xl text-xs text-amber-900 text-left">
+          <div className="mt-4 p-3 bg-amber-50 border-l-4 border-amber-400 rounded-xl text-sm text-amber-900 text-left">
             🗓 予約受付は営業日の<strong className="font-semibold">4日前（木曜日）正午12時</strong>からとなります
           </div>
-          <div className="mt-2 p-3 bg-amber-50 border-l-4 border-amber-400 rounded-xl text-xs text-amber-900 text-left">
+          <div className="mt-2 p-3 bg-amber-50 border-l-4 border-amber-400 rounded-xl text-sm text-amber-900 text-left">
             🪑 4人席をご希望の方は<strong className="font-semibold">10:00〜・12:00〜・14:00〜</strong>の時間帯からお選びください
           </div>
           <div className="mt-4 border-t border-matcha-100" />
