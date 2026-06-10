@@ -346,6 +346,9 @@ export default function ReservePage() {
             {reservationType && reservationType !== 'takeout' && selectedDate && (
               <div className="card">
                 <h2 className="text-lg font-semibold text-matcha-800 mb-4">時間帯を選んでください</h2>
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                  🪑 4人席をご希望の方は <strong>10:00〜・12:00〜・14:00〜</strong> の時間帯からお選びください
+                </div>
                 {loading ? (
                   <p className="text-gray-500 text-sm">読み込み中...</p>
                 ) : (
