@@ -216,6 +216,9 @@ export default function ReservePage() {
           <div className="mt-4 p-3 bg-amber-50 border-l-4 border-amber-400 rounded-xl text-xs text-amber-900 text-left">
             🗓 予約受付は営業日の<strong className="font-semibold">4日前（木曜日）正午12時</strong>からとなります
           </div>
+          <div className="mt-2 p-3 bg-amber-50 border-l-4 border-amber-400 rounded-xl text-xs text-amber-900 text-left">
+            🪑 4人席をご希望の方は<strong className="font-semibold">10:00〜・12:00〜・14:00〜</strong>の時間帯からお選びください
+          </div>
           <div className="mt-4 border-t border-matcha-100" />
         </div>
 
