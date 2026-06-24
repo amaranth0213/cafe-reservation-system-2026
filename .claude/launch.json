@@ -7,6 +7,13 @@
       "runtimeArgs": ["--prefix", "/Users/haru/カフェ準備管理アプリ", "run", "dev"],
       "port": 3001,
       "autoPort": true
+    },
+    {
+      "name": "yomikatarik-tool",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "/Users/haru/yomikatarik-tool", "run", "dev"],
+      "port": 3002,
+      "autoPort": true
     }
   ]
 }

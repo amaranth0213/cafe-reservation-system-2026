@@ -116,7 +116,7 @@ export interface OrderItem {
 
 // 座席カテゴリの表示名
 export const SEAT_LABELS: Record<SeatCategory, string> = {
-  sofa: 'ソファ席（2人）',
+  sofa: '小さめチェア席（2人）',
   single: '1人席',
   double: '椅子席（2人）',
   quad: '4人席',
