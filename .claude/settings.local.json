@@ -111,7 +111,15 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3055/game)",
       "Bash(curl -s http://localhost:3055/game)",
       "Bash(pkill -f \"next dev -p 3055\")",
-      "Bash(npx wrangler *)"
+      "Bash(npx wrangler *)",
+      "WebFetch(domain:acrobat.adobe.com)",
+      "Bash(find / -name \"extract-text\")",
+      "mcp__937e9086-a822-4b1a-a659-266d20a2231b__create_file",
+      "mcp__937e9086-a822-4b1a-a659-266d20a2231b__read_file_content",
+      "Bash(base64 -i \"/Users/haru/Desktop/7月6日注文受付表.xlsx\" | tr -d '\\\\n' > /tmp/sheet_b64_v2.txt *)",
+      "Bash(sed -i '' 's/    \\(\"本わらび粉使用 抹茶きなこのやわらかわらび餅\", 500\\),/    \\(\"本わらび粉使用 抹茶きなこのやわらかわらび餅\", 500\\),\\\\n    \\(\"パリパリもなか\", 400\\),/' /tmp/make_order_sheet4.py)",
+      "Bash(python3 /tmp/make_order_sheet4.py)",
+      "Bash(base64 -i \"/Users/haru/Desktop/7月6日注文受付表.xlsx\" | tr -d '\\\\n' > /tmp/sheet_b64_v3.txt *)"
     ]
   }
 }

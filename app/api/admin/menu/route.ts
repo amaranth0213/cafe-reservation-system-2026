@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase
     .from('menus')
     .select('*')
-    .order('sort_order');
+    .order('sort_order')
+    .order('id');
 
   if (error) return NextResponse.json({ error: 'データ取得に失敗しました' }, { status: 500 });
   return NextResponse.json(data ?? []);

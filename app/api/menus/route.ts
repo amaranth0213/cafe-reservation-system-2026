@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
     .from('menus')
     .select('id, name, description, price, stock, hold_count, is_takeout_available')
     .eq('is_available', true)
-    .order('sort_order');
+    .order('sort_order')
+    .order('id');
 
   if (!menus) return NextResponse.json([]);
 
