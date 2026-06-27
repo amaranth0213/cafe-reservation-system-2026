@@ -547,16 +547,16 @@ export default function AdminReservationsPage() {
                         <p className="text-sm font-medium mb-2">{menu.name} <span className="text-gray-500">¥{menu.price}</span></p>
                         <div className="flex items-center gap-3 text-sm">
                           <span className="text-gray-600 w-20">イートイン</span>
-                          <button type="button" onClick={() => updateEditItem(menu.id, menu.name, menu.price, Math.max(0, getEditQty(menu.id, false)-1), false)} className="w-7 h-7 rounded-full border flex items-center justify-center">−</button>
-                          <span className="w-5 text-center">{getEditQty(menu.id, false)}</span>
-                          <button type="button" onClick={() => updateEditItem(menu.id, menu.name, menu.price, getEditQty(menu.id, false)+1, false)} className="w-7 h-7 rounded-full border flex items-center justify-center">＋</button>
+                          <button type="button" onClick={() => updateEditItem(menu.id, menu.name, menu.price, Math.max(0, getEditQty(menu.id, false)-1), false)} className="w-11 h-11 rounded-full border flex items-center justify-center text-lg active:bg-gray-100">−</button>
+                          <span className="w-6 text-center">{getEditQty(menu.id, false)}</span>
+                          <button type="button" onClick={() => updateEditItem(menu.id, menu.name, menu.price, getEditQty(menu.id, false)+1, false)} className="w-11 h-11 rounded-full border flex items-center justify-center text-lg active:bg-gray-100">＋</button>
                         </div>
                         {menu.is_takeout_available && (
                           <div className="flex items-center gap-3 text-sm mt-1">
                             <span className="text-gray-600 w-20">お持ち帰り</span>
-                            <button type="button" onClick={() => updateEditItem(menu.id, menu.name, menu.price, Math.max(0, getEditQty(menu.id, true)-1), true)} className="w-7 h-7 rounded-full border flex items-center justify-center">−</button>
-                            <span className="w-5 text-center">{getEditQty(menu.id, true)}</span>
-                            <button type="button" onClick={() => updateEditItem(menu.id, menu.name, menu.price, getEditQty(menu.id, true)+1, true)} className="w-7 h-7 rounded-full border flex items-center justify-center">＋</button>
+                            <button type="button" onClick={() => updateEditItem(menu.id, menu.name, menu.price, Math.max(0, getEditQty(menu.id, true)-1), true)} className="w-11 h-11 rounded-full border flex items-center justify-center text-lg active:bg-gray-100">−</button>
+                            <span className="w-6 text-center">{getEditQty(menu.id, true)}</span>
+                            <button type="button" onClick={() => updateEditItem(menu.id, menu.name, menu.price, getEditQty(menu.id, true)+1, true)} className="w-11 h-11 rounded-full border flex items-center justify-center text-lg active:bg-gray-100">＋</button>
                           </div>
                         )}
                       </div>
