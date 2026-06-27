@@ -110,11 +110,31 @@ export async function closeSlotIfFull(timeSlotId: string): Promise<void> {
   }
 }
 
-// キャンセル後に受付を再開する（管理者用）
+// キャンセル後に受付を再開する（管理者用・強制的に再開）
 export async function reopenSlot(timeSlotId: string): Promise<void> {
   const supabase = createServerClient();
   await supabase
     .from('time_slots')
     .update({ is_accepting: true })
     .eq('id', timeSlotId);
+}
+
+// キャンセル後、空席があれば自動で受付を再開する（チェック忘れ防止）
+export async function reopenSlotIfAvailable(timeSlotId: string): Promise<void> {
+  const supabase = createServerClient();
+  const availability = await getSlotAvailability(timeSlotId);
+  if (!availability) return;
+
+  const quadOnly = isQuadOnlySlot(availability.slot_time);
+  const relevantSeats = quadOnly
+    ? availability.seats.filter((s) => s.category === 'quad')
+    : availability.seats.filter((s) => s.category !== 'quad');
+
+  const hasAvailability = relevantSeats.some((s) => s.remaining > 0);
+  if (hasAvailability) {
+    await supabase
+      .from('time_slots')
+      .update({ is_accepting: true })
+      .eq('id', timeSlotId);
+  }
 }

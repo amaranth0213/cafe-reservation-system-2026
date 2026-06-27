@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAdminAuthenticated } from '@/lib/auth';
 import { createServerClient } from '@/lib/supabase/server';
-import { reopenSlot } from '@/lib/availability';
+import { reopenSlot, reopenSlotIfAvailable } from '@/lib/availability';
 
 // PATCH /api/admin/reservations/[id] - キャンセル or 編集
 export async function PATCH(
@@ -118,8 +118,13 @@ export async function PATCH(
     return NextResponse.json({ error: 'キャンセルに失敗しました' }, { status: 500 });
   }
 
-  if (body.reopen_slot && reservation.time_slot_id) {
-    await reopenSlot(reservation.time_slot_id);
+  if (reservation.time_slot_id) {
+    if (body.reopen_slot) {
+      await reopenSlot(reservation.time_slot_id);
+    } else {
+      // チェックを入れ忘れていても、空席があれば自動で受付を再開する
+      await reopenSlotIfAvailable(reservation.time_slot_id);
+    }
   }
 
   return NextResponse.json({ success: true });
