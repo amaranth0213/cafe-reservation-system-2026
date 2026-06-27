@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       ),
       seat_types (id, category, capacity),
       reservation_items (
-        id, quantity, unit_price, is_takeout,
+        id, menu_id, quantity, unit_price, is_takeout,
         menus (id, name)
       )
     `)

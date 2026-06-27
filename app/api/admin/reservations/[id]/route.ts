@@ -70,6 +70,11 @@ export async function PATCH(
 
     // お菓子注文の更新（既存を削除して再登録）
     if (body.items !== undefined) {
+      // menu_id が欠けたデータは保存しない（不正データによる注文消失を防ぐ）
+      if (body.items.some(i => i.quantity > 0 && !i.menu_id)) {
+        return NextResponse.json({ error: '一部のお菓子データが不正なため保存できませんでした。画面を再読み込みしてからもう一度お試しください。' }, { status: 400 });
+      }
+
       const { error: deleteError } = await supabase
         .from('reservation_items').delete().eq('reservation_id', id);
       if (deleteError) {
