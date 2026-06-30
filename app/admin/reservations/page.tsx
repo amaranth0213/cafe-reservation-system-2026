@@ -43,6 +43,7 @@ export default function AdminReservationsPage() {
   const [newNotes, setNewNotes] = useState('');
   const [seatOptions, setSeatOptions] = useState<SeatOption[]>([]);
   const [creating, setCreating] = useState(false);
+  const [newItems, setNewItems] = useState<{menu_id:string;menu_name:string;unit_price:number;quantity:number;is_takeout:boolean}[]>([]);
 
   // 管理者用：全営業日を取得（木曜制限なし）
   const fetchDays = useCallback(async () => {
@@ -51,7 +52,23 @@ export default function AdminReservationsPage() {
     setDays(Array.isArray(data) ? data : []);
   }, []);
 
-  useEffect(() => { if (showNewForm) fetchDays(); }, [showNewForm, fetchDays]);
+  useEffect(() => {
+    if (showNewForm) {
+      fetchDays();
+      fetch('/api/admin/menu').then(r => r.json()).then((data) => setMenus((data ?? []).filter((m: {is_available: boolean}) => m.is_available))).catch(() => {});
+    }
+  }, [showNewForm, fetchDays]);
+
+  const updateNewItem = (menuId: string, menuName: string, price: number, qty: number, isTakeout: boolean) => {
+    setNewItems(prev => {
+      const filtered = prev.filter(i => !(i.menu_id === menuId && i.is_takeout === isTakeout));
+      if (qty > 0) return [...filtered, { menu_id: menuId, menu_name: menuName, unit_price: price, quantity: qty, is_takeout: isTakeout }];
+      return filtered;
+    });
+  };
+
+  const getNewQty = (menuId: string, isTakeout: boolean) =>
+    newItems.find(i => i.menu_id === menuId && i.is_takeout === isTakeout)?.quantity ?? 0;
 
   // 日付・スロット選択時に空席情報を取得
   useEffect(() => {
@@ -77,6 +94,9 @@ export default function AdminReservationsPage() {
       body.seat_type_id = newSeatTypeId;
       body.party_size = newPartySize;
     }
+    if (newType !== 'seat_only') {
+      body.items = newItems;
+    }
     const res = await fetch('/api/admin/reservations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -86,7 +106,7 @@ export default function AdminReservationsPage() {
     if (res.ok) {
       setMessage(`予約を作成しました（予約番号: ${data.reservation_code}）`);
       setShowNewForm(false);
-      setNewDate(''); setNewSlotId(''); setNewSeatTypeId(''); setNewName(''); setNewPhone(''); setNewNotes(''); setNewPartySize(1); setNewType('seat_only');
+      setNewDate(''); setNewSlotId(''); setNewSeatTypeId(''); setNewName(''); setNewPhone(''); setNewNotes(''); setNewPartySize(1); setNewType('seat_only'); setNewItems([]);
       fetchReservations();
     } else {
       setMessage(data.error ?? '作成に失敗しました');
@@ -273,6 +293,34 @@ export default function AdminReservationsPage() {
                     </div>
                   )}
                 </>
+              )}
+              {newType !== 'seat_only' && menus.length > 0 && (
+                <div>
+                  <label className="label">お菓子の注文</label>
+                  <div className="space-y-3 mt-2">
+                    {menus.map(menu => (
+                      <div key={menu.id} className="border rounded-lg p-3">
+                        <p className="text-sm font-medium mb-2">{menu.name} <span className="text-gray-500">¥{menu.price}</span></p>
+                        {newType === 'seat_with_food' && (
+                          <div className="flex items-center gap-3 text-sm">
+                            <span className="text-gray-600 w-20">イートイン</span>
+                            <button type="button" onClick={() => updateNewItem(menu.id, menu.name, menu.price, Math.max(0, getNewQty(menu.id, false)-1), false)} className="w-11 h-11 rounded-full border flex items-center justify-center text-lg active:bg-gray-100">−</button>
+                            <span className="w-6 text-center">{getNewQty(menu.id, false)}</span>
+                            <button type="button" onClick={() => updateNewItem(menu.id, menu.name, menu.price, getNewQty(menu.id, false)+1, false)} className="w-11 h-11 rounded-full border flex items-center justify-center text-lg active:bg-gray-100">＋</button>
+                          </div>
+                        )}
+                        {menu.is_takeout_available && (
+                          <div className="flex items-center gap-3 text-sm mt-1">
+                            <span className="text-gray-600 w-20">お持ち帰り</span>
+                            <button type="button" onClick={() => updateNewItem(menu.id, menu.name, menu.price, Math.max(0, getNewQty(menu.id, true)-1), true)} className="w-11 h-11 rounded-full border flex items-center justify-center text-lg active:bg-gray-100">−</button>
+                            <span className="w-6 text-center">{getNewQty(menu.id, true)}</span>
+                            <button type="button" onClick={() => updateNewItem(menu.id, menu.name, menu.price, getNewQty(menu.id, true)+1, true)} className="w-11 h-11 rounded-full border flex items-center justify-center text-lg active:bg-gray-100">＋</button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
               <div>
                 <label className="label">お名前 *</label>
